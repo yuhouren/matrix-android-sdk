@@ -24,6 +24,7 @@ import com.google.gson.GsonBuilder;
 import org.matrix.androidsdk.util.BuildConfig;
 import org.matrix.androidsdk.util.interceptors.CurlLoggingInterceptor;
 import org.matrix.androidsdk.util.interceptors.FormattedJsonHttpLogger;
+import org.matrix.androidsdk.util.json.BooleanDeserializer;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -58,15 +59,12 @@ public class ParentRestClient<T> {
     // the user agent
     private static String sUserAgent = null;
 
-    // http client
-    private OkHttpClient mOkHttpClient = new OkHttpClient();
-
     protected ParentRestClient(String baseUrl, String accessToken, Class<T> type, String uriPrefix, Converter.Factory converterFactory) {
         mAccessToken = accessToken;
 
         Gson gson = new GsonBuilder()
-//            .registerTypeAdapter(boolean.class, new BooleanDeserializer(false))
-//            .registerTypeAdapter(Boolean.class, new BooleanDeserializer(true))
+                .registerTypeAdapter(boolean.class, new BooleanDeserializer(false))
+                .registerTypeAdapter(Boolean.class, new BooleanDeserializer(true))
                 .create();
 
         Interceptor authentInterceptor = new Interceptor() {
@@ -119,14 +117,15 @@ public class ParentRestClient<T> {
         }
         */
 
-        mOkHttpClient = okHttpClientBuilder.build();
+        // http client
+        OkHttpClient okHttpClient = okHttpClientBuilder.build();
 
         // Rest adapter for turning API interfaces into actual REST-calling objects
         Retrofit.Builder builder = new Retrofit.Builder()
                 .baseUrl(endPoint)
                 .addConverterFactory(converterFactory)
                 .addConverterFactory(GsonConverterFactory.create(gson))
-                .client(mOkHttpClient);
+                .client(okHttpClient);
 
         Retrofit retrofit = builder.build();
 

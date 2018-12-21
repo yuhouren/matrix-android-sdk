@@ -30,7 +30,6 @@ import org.matrix.androidsdk.crypto.model.crypto.ForwardedRoomKeyContent;
 import org.matrix.androidsdk.crypto.model.crypto.OlmEventContent;
 import org.matrix.androidsdk.crypto.model.crypto.RoomKeyContent;
 import org.matrix.androidsdk.crypto.model.crypto.RoomKeyRequest;
-import org.matrix.androidsdk.rest.json.BooleanDeserializer;
 import org.matrix.androidsdk.rest.json.ConditionDeserializer;
 import org.matrix.androidsdk.rest.json.MatrixFieldNamingStrategy;
 import org.matrix.androidsdk.rest.model.ContentResponse;
@@ -55,6 +54,7 @@ import org.matrix.androidsdk.rest.model.message.StickerJsonMessage;
 import org.matrix.androidsdk.rest.model.message.StickerMessage;
 import org.matrix.androidsdk.rest.model.message.VideoMessage;
 import org.matrix.androidsdk.rest.model.pid.RoomThirdPartyInvite;
+import org.matrix.androidsdk.util.json.BooleanDeserializer;
 import org.matrix.androidsdk.util.model.MatrixError;
 
 import java.lang.reflect.Constructor;
