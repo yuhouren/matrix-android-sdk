@@ -44,6 +44,7 @@ import org.matrix.androidsdk.crypto.MXMegolmExportEncryption;
 import org.matrix.androidsdk.crypto.MXOlmDevice;
 import org.matrix.androidsdk.crypto.MXOutgoingRoomKeyRequestManager;
 import org.matrix.androidsdk.crypto.MegolmSessionData;
+import org.matrix.androidsdk.crypto.RoomKeysRequestListener;
 import org.matrix.androidsdk.crypto.algorithms.IMXDecrypting;
 import org.matrix.androidsdk.crypto.algorithms.IMXEncrypting;
 import org.matrix.androidsdk.crypto.cryptostore.IMXCryptoStore;
@@ -366,6 +367,7 @@ public class MXCryptoImpl implements MXCrypto {
     /**
      * @return true if some saved data is corrupted
      */
+    @Override
     public boolean isCorrupted() {
         return (null != mCryptoStore) && mCryptoStore.isCorrupted();
     }
@@ -756,6 +758,7 @@ public class MXCryptoImpl implements MXCrypto {
      * @param deviceId the device id
      * @param callback the asynchronous callback
      */
+    @Override
     public void getDeviceInfo(final String userId, final String deviceId, final ApiCallback<MXDeviceInfo> callback) {
         getDecryptingThreadHandler().post(new Runnable() {
             @Override
@@ -2776,6 +2779,7 @@ public class MXCryptoImpl implements MXCrypto {
      *
      * @param event the event to decrypt again.
      */
+    @Override
     public void reRequestRoomKeyForEvent(@NonNull final CryptoEvent event) {
         if (event.getWireContent().isJsonObject()) {
             JsonObject wireContent = event.getWireContent().getAsJsonObject();
@@ -2804,45 +2808,27 @@ public class MXCryptoImpl implements MXCrypto {
         return mCryptoRestClient;
     }
 
-    /**
-     * Room keys events listener
-     */
-    public interface IRoomKeysRequestListener {
-        /**
-         * An room key request has been received.
-         *
-         * @param request the request
-         */
-        void onRoomKeyRequest(IncomingRoomKeyRequest request);
-
-        /**
-         * A room key request cancellation has been received.
-         *
-         * @param request the cancellation request
-         */
-        void onRoomKeyRequestCancellation(IncomingRoomKeyRequestCancellation request);
-    }
-
     // the listeners
-    public final Set<IRoomKeysRequestListener> mRoomKeysRequestListeners = new HashSet<>();
+    public final Set<RoomKeysRequestListener> mRoomKeysRequestListeners = new HashSet<>();
 
     /**
-     * Add a IRoomKeysRequestListener listener.
+     * Add a RoomKeysRequestListener listener.
      *
      * @param listener listener
      */
-    public void addRoomKeysRequestListener(IRoomKeysRequestListener listener) {
+    @Override
+    public void addRoomKeysRequestListener(RoomKeysRequestListener listener) {
         synchronized (mRoomKeysRequestListeners) {
             mRoomKeysRequestListeners.add(listener);
         }
     }
 
     /**
-     * Add a IRoomKeysRequestListener listener.
+     * Add a RoomKeysRequestListener listener.
      *
      * @param listener listener
      */
-    public void removeRoomKeysRequestListener(IRoomKeysRequestListener listener) {
+    public void removeRoomKeysRequestListener(RoomKeysRequestListener listener) {
         synchronized (mRoomKeysRequestListeners) {
             mRoomKeysRequestListeners.remove(listener);
         }
@@ -2855,7 +2841,7 @@ public class MXCryptoImpl implements MXCrypto {
      */
     private void onRoomKeyRequest(IncomingRoomKeyRequest request) {
         synchronized (mRoomKeysRequestListeners) {
-            for (IRoomKeysRequestListener listener : mRoomKeysRequestListeners) {
+            for (RoomKeysRequestListener listener : mRoomKeysRequestListeners) {
                 try {
                     listener.onRoomKeyRequest(request);
                 } catch (Exception e) {
@@ -2873,7 +2859,7 @@ public class MXCryptoImpl implements MXCrypto {
      */
     private void onRoomKeyRequestCancellation(IncomingRoomKeyRequestCancellation request) {
         synchronized (mRoomKeysRequestListeners) {
-            for (IRoomKeysRequestListener listener : mRoomKeysRequestListeners) {
+            for (RoomKeysRequestListener listener : mRoomKeysRequestListeners) {
                 try {
                     listener.onRoomKeyRequestCancellation(request);
                 } catch (Exception e) {

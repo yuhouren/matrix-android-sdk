@@ -35,6 +35,8 @@ interface MXCrypto {
 
     fun isStarting(): Boolean
 
+    fun isCorrupted(): Boolean
+
     fun close()
 
     val keysBackup: KeysBackup
@@ -90,6 +92,12 @@ interface MXCrypto {
     fun exportRoomKeys(password: String, callback: ApiCallback<ByteArray>)
 
     fun setRoomBlacklistUnverifiedDevices(roomId: String, apiCallback: ApiCallback<Void>)
+
+    fun getDeviceInfo(userId: String, deviceId: String?, callback: ApiCallback<MXDeviceInfo>)
+
+    fun reRequestRoomKeyForEvent(event: CryptoEvent)
+
+    fun addRoomKeysRequestListener(listener: RoomKeysRequestListener)
 
     @VisibleForTesting
     val cryptoStore: IMXCryptoStore
