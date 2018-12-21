@@ -23,7 +23,6 @@ import io.realm.annotations.PrimaryKey
 import org.matrix.androidsdk.crypto.cryptostore.db.deserializeFromRealm
 import org.matrix.androidsdk.crypto.cryptostore.db.serializeForRealm
 import org.matrix.androidsdk.crypto.data.MXDeviceInfo
-import org.matrix.androidsdk.crypto.interfaces.CryptoUtil
 
 fun DeviceInfoEntity.Companion.createPrimaryKey(userId: String, deviceId: String) = "$userId|$deviceId"
 
@@ -40,8 +39,8 @@ open class DeviceInfoEntity(@PrimaryKey var primaryKey: String = "",
     }
 
     // Serialize data
-    fun putDeviceInfo(deviceInfo: MXDeviceInfo?, cryptoUtil: CryptoUtil) {
-        deviceInfoData = serializeForRealm(deviceInfo, cryptoUtil)
+    fun putDeviceInfo(deviceInfo: MXDeviceInfo?) {
+        deviceInfoData = serializeForRealm(deviceInfo)
     }
 
     @LinkingObjects("devices")

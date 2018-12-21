@@ -23,7 +23,6 @@ import org.matrix.androidsdk.crypto.cryptostore.IMXCryptoStore
 import org.matrix.androidsdk.crypto.cryptostore.MXFileCryptoStore
 import org.matrix.androidsdk.crypto.cryptostore.db.RealmCryptoStore
 import org.matrix.androidsdk.rest.model.login.Credentials
-import org.matrix.androidsdk.util.CryptoUtilImpl
 import java.util.*
 
 class CryptoStoreHelper {
@@ -32,7 +31,7 @@ class CryptoStoreHelper {
         val context = InstrumentationRegistry.getContext()
 
         return (if (useRealm) RealmCryptoStore() else MXFileCryptoStore(false)).apply {
-            initWithCredentials(context, createCredential(), CryptoUtilImpl)
+            initWithCredentials(context, createCredential())
         }
     }
 

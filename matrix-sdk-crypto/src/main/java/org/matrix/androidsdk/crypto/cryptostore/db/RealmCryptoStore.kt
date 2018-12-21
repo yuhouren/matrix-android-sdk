@@ -31,7 +31,6 @@ import org.matrix.androidsdk.crypto.cryptostore.db.query.getOrCreate
 import org.matrix.androidsdk.crypto.data.MXDeviceInfo
 import org.matrix.androidsdk.crypto.data.MXOlmInboundGroupSession2
 import org.matrix.androidsdk.crypto.interfaces.CryptoCredentials
-import org.matrix.androidsdk.crypto.interfaces.CryptoUtil
 import org.matrix.androidsdk.util.Log
 import org.matrix.olm.OlmAccount
 import org.matrix.olm.OlmException
@@ -61,11 +60,9 @@ class RealmCryptoStore(private val enableFileEncryption: Boolean = false) : IMXC
 
     private lateinit var credentials: CryptoCredentials
     private lateinit var realmConfiguration: RealmConfiguration
-    private lateinit var cryptoUtil: CryptoUtil
 
-    override fun initWithCredentials(context: Context, credentials: CryptoCredentials, cryptoUtil: CryptoUtil) {
+    override fun initWithCredentials(context: Context, credentials: CryptoCredentials) {
         this.credentials = credentials
-        this.cryptoUtil = cryptoUtil
 
         // Ensure realm is initialized
         Realm.init(context.applicationContext)
@@ -75,7 +72,7 @@ class RealmCryptoStore(private val enableFileEncryption: Boolean = false) : IMXC
                 .name("crypto_store.realm")
                 .schemaVersion(RealmCryptoStoreMigration.CRYPTO_STORE_SCHEMA_VERSION)
                 .migration(RealmCryptoStoreMigration)
-                .initialData(CryptoFileStoreImporter(enableFileEncryption, context, credentials, cryptoUtil))
+                .initialData(CryptoFileStoreImporter(enableFileEncryption, context, credentials))
                 .build()
     }
 
@@ -162,7 +159,7 @@ class RealmCryptoStore(private val enableFileEncryption: Boolean = false) : IMXC
         olmAccount = account
 
         doRealmTransaction(realmConfiguration) {
-            it.where<CryptoMetadataEntity>().findFirst()?.putOlmAccount(account, cryptoUtil)
+            it.where<CryptoMetadataEntity>().findFirst()?.putOlmAccount(account)
         }
     }
 
@@ -186,7 +183,7 @@ class RealmCryptoStore(private val enableFileEncryption: Boolean = false) : IMXC
             val deviceInfoEntity = DeviceInfoEntity.getOrCreate(it, userId, deviceInfo.deviceId).apply {
                 deviceId = deviceInfo.deviceId
                 identityKey = deviceInfo.identityKey()
-                putDeviceInfo(deviceInfo, cryptoUtil)
+                putDeviceInfo(deviceInfo)
             }
 
             // TODO Test if it is not added twice
@@ -238,7 +235,7 @@ class RealmCryptoStore(private val enableFileEncryption: Boolean = false) : IMXC
                                         DeviceInfoEntity.getOrCreate(r, userId, it.value.deviceId).apply {
                                             deviceId = it.value.deviceId
                                             identityKey = it.value.identityKey()
-                                            putDeviceInfo(it.value, cryptoUtil)
+                                            putDeviceInfo(it.value)
                                         }
                                     }
                             )
@@ -300,7 +297,7 @@ class RealmCryptoStore(private val enableFileEncryption: Boolean = false) : IMXC
                     primaryKey = key
                     sessionId = sessionIdentifier
                     this.deviceKey = deviceKey
-                    putOlmSession(session, cryptoUtil)
+                    putOlmSession(session)
                 }
 
                 it.insertOrUpdate(realmOlmSession)
@@ -371,7 +368,7 @@ class RealmCryptoStore(private val enableFileEncryption: Boolean = false) : IMXC
                     primaryKey = key
                     sessionId = sessionIdentifier
                     senderKey = session.mSenderKey
-                    putInboundGroupSession(session, cryptoUtil)
+                    putInboundGroupSession(session)
                 }
 
                 it.insertOrUpdate(realmOlmInboundGroupSession)
@@ -578,7 +575,7 @@ class RealmCryptoStore(private val enableFileEncryption: Boolean = false) : IMXC
 
         return doRealmQueryAndCopy(realmConfiguration) {
             it.where<OutgoingRoomKeyRequestEntity>()
-                    .equalTo(OutgoingRoomKeyRequestEntityFields.REQUEST_BODY_STRING, serializeForRealm(requestBody, cryptoUtil))
+                    .equalTo(OutgoingRoomKeyRequestEntityFields.REQUEST_BODY_STRING, serializeForRealm(requestBody))
                     .findFirst()
         }
                 ?.toOutgoingRoomKeyRequest()
@@ -598,8 +595,8 @@ class RealmCryptoStore(private val enableFileEncryption: Boolean = false) : IMXC
         // Insert the request and return the one passed in parameter
         doRealmTransaction(realmConfiguration) {
             it.createObject(OutgoingRoomKeyRequestEntity::class.java, request.mRequestId).apply {
-                putRequestBody(request.mRequestBody, cryptoUtil)
-                putRecipients(request.mRecipients, cryptoUtil)
+                putRequestBody(request.mRequestBody)
+                putRecipients(request.mRecipients)
                 cancellationTxnId = request.mCancellationTxnId
                 state = request.mState.ordinal
             }
@@ -631,8 +628,8 @@ class RealmCryptoStore(private val enableFileEncryption: Boolean = false) : IMXC
                 requestId = request.mRequestId
                 cancellationTxnId = request.mCancellationTxnId
                 state = request.mState.ordinal
-                putRecipients(request.mRecipients, cryptoUtil)
-                putRequestBody(request.mRequestBody, cryptoUtil)
+                putRecipients(request.mRecipients)
+                putRequestBody(request.mRequestBody)
             }
 
             it.insertOrUpdate(obj)
@@ -671,7 +668,7 @@ class RealmCryptoStore(private val enableFileEncryption: Boolean = false) : IMXC
                 userId = incomingRoomKeyRequest.mUserId
                 deviceId = incomingRoomKeyRequest.mDeviceId
                 requestId = incomingRoomKeyRequest.mRequestId
-                putRequestBody(incomingRoomKeyRequest.mRequestBody, cryptoUtil)
+                putRequestBody(incomingRoomKeyRequest.mRequestBody)
             }
         }
     }

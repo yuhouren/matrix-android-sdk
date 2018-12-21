@@ -26,7 +26,6 @@ import org.matrix.androidsdk.crypto.cryptostore.MXFileCryptoStore
 import org.matrix.androidsdk.crypto.cryptostore.db.model.*
 import org.matrix.androidsdk.crypto.cryptostore.db.query.getOrCreate
 import org.matrix.androidsdk.crypto.interfaces.CryptoCredentials
-import org.matrix.androidsdk.crypto.interfaces.CryptoUtil
 import org.matrix.androidsdk.util.Log
 
 /**
@@ -34,13 +33,12 @@ import org.matrix.androidsdk.util.Log
  */
 internal class CryptoFileStoreImporter(private val enableFileEncryption: Boolean,
                                        private val context: Context,
-                                       private val credentials: CryptoCredentials,
-                                       private val cryptoUtil: CryptoUtil) : Realm.Transaction {
+                                       private val credentials: CryptoCredentials) : Realm.Transaction {
 
     override fun execute(realm: Realm) {
         // Create a FileCryptoStore
         val fileCryptoStore = MXFileCryptoStore(enableFileEncryption)
-        fileCryptoStore.initWithCredentials(context, credentials, cryptoUtil)
+        fileCryptoStore.initWithCredentials(context, credentials)
 
         if (fileCryptoStore.hasData()) {
             Log.d(LOG_TAG, "Importing data...")
@@ -83,7 +81,7 @@ internal class CryptoFileStoreImporter(private val enableFileEncryption: Boolean
             deviceId = fileCryptoStore.deviceId
             backupVersion = null
             // TODO deviceSyncToken = fileCryptoStore.
-            putOlmAccount(fileCryptoStore.account, cryptoUtil)
+            putOlmAccount(fileCryptoStore.account)
             globalBlacklistUnverifiedDevices = fileCryptoStore.globalBlacklistUnverifiedDevices
         }
     }
@@ -128,7 +126,7 @@ internal class CryptoFileStoreImporter(private val enableFileEncryption: Boolean
                                     DeviceInfoEntity.getOrCreate(realm, userIdToDevices.key, deviceIdToDevice.value.deviceId).apply {
                                         deviceId = deviceIdToDevice.key
                                         identityKey = deviceIdToDevice.value.identityKey()
-                                        putDeviceInfo(deviceIdToDevice.value, cryptoUtil)
+                                        putDeviceInfo(deviceIdToDevice.value)
                                     }
                             )
                         }
@@ -154,8 +152,8 @@ internal class CryptoFileStoreImporter(private val enableFileEncryption: Boolean
                 }
                 ?.forEach { entry ->
                     realm.createObject(OutgoingRoomKeyRequestEntity::class.java, entry.value.mRequestId).apply {
-                        putRecipients(entry.value.mRecipients, cryptoUtil)
-                        putRequestBody(entry.value.mRequestBody, cryptoUtil)
+                        putRecipients(entry.value.mRecipients)
+                        putRequestBody(entry.value.mRequestBody)
                         state = entry.value.mState.ordinal
                         cancellationTxnId = entry.value.mCancellationTxnId
                     }
@@ -172,7 +170,7 @@ internal class CryptoFileStoreImporter(private val enableFileEncryption: Boolean
                         requestId = entry.mRequestId
                         userId = entry.mUserId
                         deviceId = entry.mDeviceId
-                        putRequestBody(entry.mRequestBody, cryptoUtil)
+                        putRequestBody(entry.mRequestBody)
                     }
                 }
     }
@@ -188,7 +186,7 @@ internal class CryptoFileStoreImporter(private val enableFileEncryption: Boolean
                                 .apply {
                                     deviceKey = deviceKeyToMap.key
                                     sessionId = olmSessionIdToOlmSession.key
-                                    putOlmSession(olmSessionIdToOlmSession.value, cryptoUtil)
+                                    putOlmSession(olmSessionIdToOlmSession.value)
                                 }
                     }
                 }
@@ -204,7 +202,7 @@ internal class CryptoFileStoreImporter(private val enableFileEncryption: Boolean
                             OlmInboundGroupSessionEntity.createPrimaryKey(it.mSession.sessionIdentifier(), it.mSenderKey)).apply {
                         sessionId = it.mSession.sessionIdentifier()
                         senderKey = it.mSenderKey
-                        putInboundGroupSession(it, cryptoUtil)
+                        putInboundGroupSession(it)
                     }
                 }
     }

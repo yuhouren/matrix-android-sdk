@@ -20,7 +20,7 @@ import android.util.Base64
 import io.realm.Realm
 import io.realm.RealmConfiguration
 import io.realm.RealmObject
-import org.matrix.androidsdk.crypto.interfaces.CryptoUtil
+import org.matrix.androidsdk.util.CompatUtil
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.ObjectInputStream
@@ -90,13 +90,13 @@ fun doRealmTransaction(realmConfiguration: RealmConfiguration, action: (Realm) -
 /**
  * Serialize any Serializable object, zip it and convert to Base64 String
  */
-fun serializeForRealm(o: Any?, cryptoUtil: CryptoUtil): String? {
+fun serializeForRealm(o: Any?): String? {
     if (o == null) {
         return null
     }
 
     val baos = ByteArrayOutputStream()
-    val gzis = cryptoUtil.createGzipOutputStream(baos)
+    val gzis = CompatUtil.createGzipOutputStream(baos)
     val out = ObjectOutputStream(gzis)
 
     out.writeObject(o)

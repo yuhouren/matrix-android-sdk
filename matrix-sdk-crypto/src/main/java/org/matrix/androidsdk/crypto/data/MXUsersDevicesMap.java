@@ -176,7 +176,7 @@ public class MXUsersDevicesMap<E> implements Serializable {
     }
 
     @Override
-    public java.lang.String toString() {
+    public String toString() {
         if (null != mMap) {
             return "MXUsersDevicesMap " + mMap.toString();
         } else {

@@ -34,7 +34,6 @@ import org.matrix.androidsdk.data.RoomState
 import org.matrix.androidsdk.data.timeline.EventTimeline
 import org.matrix.androidsdk.listeners.MXEventListener
 import org.matrix.androidsdk.rest.model.Event
-import org.matrix.androidsdk.util.CryptoUtilImpl
 import org.matrix.androidsdk.util.Log
 import org.matrix.olm.OlmAccount
 import org.matrix.olm.OlmSession
@@ -355,7 +354,7 @@ class CryptoStoreMigrationTest {
         val credentials = cryptoStoreHelper.createCredential()
 
         val fileCryptoStore = MXFileCryptoStore(false)
-        fileCryptoStore.initWithCredentials(context, credentials, CryptoUtilImpl)
+        fileCryptoStore.initWithCredentials(context, credentials)
 
         fileCryptoStore.open()
 
@@ -364,7 +363,7 @@ class CryptoStoreMigrationTest {
 
         // It will trigger the migration
         val realmCryptoStore = RealmCryptoStore()
-        realmCryptoStore.initWithCredentials(context, credentials, CryptoUtilImpl)
+        realmCryptoStore.initWithCredentials(context, credentials)
 
         // Check the realm store content
         checkOnRealmStore.invoke(realmCryptoStore)

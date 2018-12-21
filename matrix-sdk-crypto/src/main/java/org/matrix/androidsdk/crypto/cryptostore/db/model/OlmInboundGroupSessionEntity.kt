@@ -21,7 +21,6 @@ import io.realm.annotations.PrimaryKey
 import org.matrix.androidsdk.crypto.cryptostore.db.deserializeFromRealm
 import org.matrix.androidsdk.crypto.cryptostore.db.serializeForRealm
 import org.matrix.androidsdk.crypto.data.MXOlmInboundGroupSession2
-import org.matrix.androidsdk.crypto.interfaces.CryptoUtil
 
 fun OlmInboundGroupSessionEntity.Companion.createPrimaryKey(sessionId: String?, senderKey: String?) = "$sessionId|$senderKey"
 
@@ -40,8 +39,8 @@ open class OlmInboundGroupSessionEntity(
         return deserializeFromRealm(olmInboundGroupSessionData)
     }
 
-    fun putInboundGroupSession(mxOlmInboundGroupSession2: MXOlmInboundGroupSession2?, cryptoUtil: CryptoUtil) {
-        olmInboundGroupSessionData = serializeForRealm(mxOlmInboundGroupSession2, cryptoUtil)
+    fun putInboundGroupSession(mxOlmInboundGroupSession2: MXOlmInboundGroupSession2?) {
+        olmInboundGroupSessionData = serializeForRealm(mxOlmInboundGroupSession2)
     }
 
     companion object

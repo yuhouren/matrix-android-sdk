@@ -37,6 +37,11 @@ import org.matrix.androidsdk.crypto.cryptostore.IMXCryptoStore;
 import org.matrix.androidsdk.crypto.cryptostore.MXFileCryptoStore;
 import org.matrix.androidsdk.crypto.cryptostore.db.RealmCryptoStore;
 import org.matrix.androidsdk.crypto.interfaces.CryptoSession;
+import org.matrix.androidsdk.crypto.model.rest.DeleteDeviceAuth;
+import org.matrix.androidsdk.crypto.model.rest.DeleteDeviceParams;
+import org.matrix.androidsdk.crypto.model.rest.DevicesListResponse;
+import org.matrix.androidsdk.crypto.rest.CryptoRestClient;
+import org.matrix.androidsdk.crypto.rest.RoomKeysRestClient;
 import org.matrix.androidsdk.data.DataRetriever;
 import org.matrix.androidsdk.data.MyUser;
 import org.matrix.androidsdk.data.Room;
@@ -52,7 +57,6 @@ import org.matrix.androidsdk.groups.GroupsManager;
 import org.matrix.androidsdk.network.NetworkConnectivityReceiver;
 import org.matrix.androidsdk.rest.client.AccountDataRestClient;
 import org.matrix.androidsdk.rest.client.CallRestClient;
-import org.matrix.androidsdk.rest.client.CryptoRestClient;
 import org.matrix.androidsdk.rest.client.EventsRestClient;
 import org.matrix.androidsdk.rest.client.FilterRestClient;
 import org.matrix.androidsdk.rest.client.GroupsRestClient;
@@ -62,7 +66,6 @@ import org.matrix.androidsdk.rest.client.PresenceRestClient;
 import org.matrix.androidsdk.rest.client.ProfileRestClient;
 import org.matrix.androidsdk.rest.client.PushRulesRestClient;
 import org.matrix.androidsdk.rest.client.PushersRestClient;
-import org.matrix.androidsdk.rest.client.RoomKeysRestClient;
 import org.matrix.androidsdk.rest.client.RoomsRestClient;
 import org.matrix.androidsdk.rest.client.ThirdPidRestClient;
 import org.matrix.androidsdk.rest.model.CreateRoomParams;
@@ -82,23 +85,20 @@ import org.matrix.androidsdk.rest.model.login.RegistrationFlowResponse;
 import org.matrix.androidsdk.rest.model.login.ThreePidCredentials;
 import org.matrix.androidsdk.rest.model.message.MediaMessage;
 import org.matrix.androidsdk.rest.model.message.Message;
-import org.matrix.androidsdk.rest.model.pid.DeleteDeviceAuth;
-import org.matrix.androidsdk.rest.model.pid.DeleteDeviceParams;
 import org.matrix.androidsdk.rest.model.search.SearchResponse;
 import org.matrix.androidsdk.rest.model.search.SearchUsersResponse;
 import org.matrix.androidsdk.rest.model.sync.AccountDataElement;
-import org.matrix.androidsdk.rest.model.sync.DevicesListResponse;
 import org.matrix.androidsdk.rest.model.sync.RoomResponse;
 import org.matrix.androidsdk.sync.DefaultEventsThreadListener;
 import org.matrix.androidsdk.sync.EventsThread;
 import org.matrix.androidsdk.sync.EventsThreadListener;
 import org.matrix.androidsdk.util.BingRulesManager;
 import org.matrix.androidsdk.util.ContentManager;
-import org.matrix.androidsdk.util.ContentUtils;
-import org.matrix.androidsdk.util.CryptoUtilImpl;
+import org.matrix.androidsdk.util.FileContentUtils;
 import org.matrix.androidsdk.util.FilterUtil;
 import org.matrix.androidsdk.util.JsonUtils;
 import org.matrix.androidsdk.util.Log;
+import org.matrix.androidsdk.util.PolymorphicRequestBodyConverter;
 import org.matrix.androidsdk.util.UnsentEventsManager;
 import org.matrix.androidsdk.util.VersionsUtil;
 import org.matrix.androidsdk.util.callback.ApiCallback;
@@ -142,12 +142,10 @@ public class MXSession implements CryptoSession {
     private final ThirdPidRestClient mThirdPidRestClient;
     private final CallRestClient mCallRestClient;
     private final AccountDataRestClient mAccountDataRestClient;
-    private final CryptoRestClient mCryptoRestClient;
     private final LoginRestClient mLoginRestClient;
     private final GroupsRestClient mGroupsRestClient;
     private final MediaScanRestClient mMediaScanRestClient;
     private final FilterRestClient mFilterRestClient;
-    private final RoomKeysRestClient mRoomKeysRestClient;
 
     private ApiFailureCallback mFailureCallback;
 
@@ -230,12 +228,10 @@ public class MXSession implements CryptoSession {
         mThirdPidRestClient = new ThirdPidRestClient(hsConfig);
         mCallRestClient = new CallRestClient(hsConfig);
         mAccountDataRestClient = new AccountDataRestClient(hsConfig);
-        mCryptoRestClient = new CryptoRestClient(hsConfig);
         mLoginRestClient = new LoginRestClient(hsConfig);
         mGroupsRestClient = new GroupsRestClient(hsConfig);
         mMediaScanRestClient = new MediaScanRestClient(hsConfig);
         mFilterRestClient = new FilterRestClient(hsConfig);
-        mRoomKeysRestClient = new RoomKeysRestClient(hsConfig);
     }
 
     /**
@@ -267,7 +263,7 @@ public class MXSession implements CryptoSession {
 
         // Init the crypto store
         mCryptoStore = withLegacyCryptoStore ? new MXFileCryptoStore(withFileEncryptionEnabled) : new RealmCryptoStore(withFileEncryptionEnabled);
-        mCryptoStore.initWithCredentials(mContext, mCredentials, CryptoUtilImpl.INSTANCE);
+        mCryptoStore.initWithCredentials(mContext, mCredentials);
 
         mDataHandler.getStore().addMXStoreListener(new MXStoreListener() {
             @Override
@@ -353,7 +349,6 @@ public class MXSession implements CryptoSession {
         mThirdPidRestClient.setUnsentEventsManager(mUnsentEventsManager);
         mCallRestClient.setUnsentEventsManager(mUnsentEventsManager);
         mAccountDataRestClient.setUnsentEventsManager(mUnsentEventsManager);
-        mCryptoRestClient.setUnsentEventsManager(mUnsentEventsManager);
         mLoginRestClient.setUnsentEventsManager(mUnsentEventsManager);
         mGroupsRestClient.setUnsentEventsManager(mUnsentEventsManager);
 
@@ -493,10 +488,9 @@ public class MXSession implements CryptoSession {
      *
      * @return the Room Keys API client
      */
-    @Override
     public RoomKeysRestClient getRoomKeysRestClient() {
         checkIfAlive();
-        return mRoomKeysRestClient;
+        return mCrypto.getKeysBackup().getRoomKeysRestClient();
     }
 
     /**
@@ -553,10 +547,9 @@ public class MXSession implements CryptoSession {
         return mPushersRestClient;
     }
 
-    @Override
     public CryptoRestClient getCryptoRestClient() {
         checkIfAlive();
-        return mCryptoRestClient;
+        return mCrypto.getCryptoRestClient();
     }
 
     public HomeServerConnectionConfig getHomeServerConfig() {
@@ -624,7 +617,7 @@ public class MXSession implements CryptoSession {
         AsyncTask<Void, Void, Long> task = new AsyncTask<Void, Void, Long>() {
             @Override
             protected Long doInBackground(Void... params) {
-                return ContentUtils.getDirectorySize(context, context.getApplicationContext().getFilesDir().getParentFile(), 5);
+                return FileContentUtils.getDirectorySize(context, context.getApplicationContext().getFilesDir().getParentFile(), 5);
             }
 
             @Override
@@ -803,7 +796,7 @@ public class MXSession implements CryptoSession {
 
                     if (null != logFiles) {
                         for (File file : logFiles) {
-                            if (ContentUtils.getLastAccessTime(file) < timestamp) {
+                            if (FileContentUtils.getLastAccessTime(file) < timestamp) {
                                 length += file.length();
                                 file.delete();
                             }
@@ -2386,7 +2379,12 @@ public class MXSession implements CryptoSession {
                 return;
             }
 
-            mCrypto = new MXCrypto(this, mCryptoStore, sCryptoConfig, CryptoUtilImpl.INSTANCE);
+            mCrypto = new MXCrypto(this,
+                    mCryptoStore,
+                    sCryptoConfig,
+                    mHsConfig.getHomeserverUri().toString(),
+                    mCredentials.accessToken,
+                    PolymorphicRequestBodyConverter.FACTORY);
             mDataHandler.setCrypto(mCrypto);
             // the room summaries are not stored with decrypted content
             decryptRoomSummaries();
@@ -2409,7 +2407,12 @@ public class MXSession implements CryptoSession {
             if (cryptoEnabled) {
                 Log.d(LOG_TAG, "Crypto is enabled");
                 mCryptoStore.open();
-                mCrypto = new MXCrypto(this, mCryptoStore, sCryptoConfig, CryptoUtilImpl.INSTANCE);
+                mCrypto = new MXCrypto(this,
+                        mCryptoStore,
+                        sCryptoConfig,
+                        mHsConfig.getHomeserverUri().toString(),
+                        mCredentials.accessToken,
+                        PolymorphicRequestBodyConverter.FACTORY);
                 mCrypto.start(true, new SimpleApiCallback<Void>(callback) {
                     @Override
                     public void onSuccess(Void info) {
@@ -2447,7 +2450,7 @@ public class MXSession implements CryptoSession {
      * @param callback the asynchronous callback
      */
     public void getDevicesList(ApiCallback<DevicesListResponse> callback) {
-        mCryptoRestClient.getDevices(callback);
+        mCrypto.getCryptoRestClient().getDevices(callback);
     }
 
     /**
@@ -2458,7 +2461,7 @@ public class MXSession implements CryptoSession {
      * @param callback   the asynchronous callback
      */
     public void setDeviceName(final String deviceId, final String deviceName, final ApiCallback<Void> callback) {
-        mCryptoRestClient.setDeviceName(deviceId, deviceName, callback);
+        mCrypto.getCryptoRestClient().setDeviceName(deviceId, deviceName, callback);
     }
 
     /**
@@ -2469,7 +2472,7 @@ public class MXSession implements CryptoSession {
      * @param callback the asynchronous callback.
      */
     public void deleteDevice(final String deviceId, final String password, final ApiCallback<Void> callback) {
-        mCryptoRestClient.deleteDevice(deviceId, new DeleteDeviceParams(), new SimpleApiCallback<Void>(callback) {
+        mCrypto.getCryptoRestClient().deleteDevice(deviceId, new DeleteDeviceParams(), new SimpleApiCallback<Void>(callback) {
             @Override
             public void onSuccess(Void info) {
                 // should never happen
@@ -2539,7 +2542,7 @@ public class MXSession implements CryptoSession {
         params.auth.type = stages.get(0);
         stages.remove(0);
 
-        mCryptoRestClient.deleteDevice(deviceId, params, new SimpleApiCallback<Void>(callback) {
+        mCrypto.getCryptoRestClient().deleteDevice(deviceId, params, new SimpleApiCallback<Void>(callback) {
             @Override
             public void onSuccess(Void info) {
                 if (null != callback) {

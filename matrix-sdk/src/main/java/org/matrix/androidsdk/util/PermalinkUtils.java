@@ -21,7 +21,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
-import org.matrix.androidsdk.MXPatterns;
 import org.matrix.androidsdk.rest.model.Event;
 
 import java.net.URLDecoder;

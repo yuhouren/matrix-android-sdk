@@ -24,11 +24,11 @@ import org.matrix.androidsdk.crypto.MegolmSessionData
 import org.matrix.androidsdk.crypto.data.ImportRoomKeysResult
 import org.matrix.androidsdk.crypto.data.MXDeviceInfo
 import org.matrix.androidsdk.crypto.data.MXOlmInboundGroupSession2
-import org.matrix.androidsdk.crypto.interfaces.CryptoSession
-import org.matrix.androidsdk.crypto.interfaces.CryptoUtil
 import org.matrix.androidsdk.crypto.model.keys.*
+import org.matrix.androidsdk.crypto.rest.RoomKeysRestClient
 import org.matrix.androidsdk.crypto.util.computeRecoveryKey
 import org.matrix.androidsdk.crypto.util.extractCurveKeyFromRecoveryKey
+import org.matrix.androidsdk.util.JsonUtility
 import org.matrix.androidsdk.util.Log
 import org.matrix.androidsdk.util.callback.ApiCallback
 import org.matrix.androidsdk.util.callback.SimpleApiCallback
@@ -39,6 +39,7 @@ import org.matrix.olm.OlmException
 import org.matrix.olm.OlmPkDecryption
 import org.matrix.olm.OlmPkEncryption
 import org.matrix.olm.OlmPkMessage
+import retrofit2.Converter
 import java.util.*
 
 /**
@@ -46,10 +47,11 @@ import java.util.*
  * to the user's homeserver.
  */
 class KeysBackup(private val mCrypto: MXCrypto,
-                 session: CryptoSession,
-                 val cryptoUtil: CryptoUtil) {
+                 homeServerUrl: String,
+                 accessToken: String,
+                 converterFactory: Converter.Factory) {
 
-    private val mRoomKeysRestClient = session.getRoomKeysRestClient()
+    private val mRoomKeysRestClient = RoomKeysRestClient(homeServerUrl, accessToken, converterFactory)
 
     private val mKeysBackupStateManager = KeysBackupStateManager()
 
@@ -99,7 +101,7 @@ class KeysBackup(private val mCrypto: MXCrypto,
                 val signatures = mapOf("public_key" to publicKey)
                 val megolmBackupAuthData = MegolmBackupAuthData(
                         publicKey = publicKey,
-                        signatures = mCrypto.signObject(cryptoUtil.getCanonicalizedJsonString(signatures))
+                        signatures = mCrypto.signObject(JsonUtility.getCanonicalizedJsonString(signatures))
                 )
 
                 val megolmBackupCreationInfo = MegolmBackupCreationInfo()
@@ -126,7 +128,7 @@ class KeysBackup(private val mCrypto: MXCrypto,
                                callback: ApiCallback<KeysVersion>) {
         val createKeysBackupVersionBody = CreateKeysBackupVersionBody()
         createKeysBackupVersionBody.algorithm = keyBackupCreationInfo.algorithm
-        createKeysBackupVersionBody.authData = cryptoUtil.getBasicGson().toJsonTree(keyBackupCreationInfo.authData)
+        createKeysBackupVersionBody.authData = JsonUtility.getBasicGson().toJsonTree(keyBackupCreationInfo.authData)
 
         mRoomKeysRestClient.createKeysBackupVersion(createKeysBackupVersionBody, object : SimpleApiCallback<KeysVersion>(callback) {
             override fun onSuccess(info: KeysVersion) {
@@ -225,7 +227,7 @@ class KeysBackup(private val mCrypto: MXCrypto,
             val myUserId = mCrypto.myDevice.userId
 
             val keyBackupVersionTrust = KeyBackupVersionTrust()
-            val authData = keyBackupVersion.getAuthDataAsMegolmBackupAuthData(cryptoUtil)
+            val authData = keyBackupVersion.getAuthDataAsMegolmBackupAuthData()
 
             if (keyBackupVersion.algorithm == null
                     || authData == null
@@ -582,7 +584,7 @@ class KeysBackup(private val mCrypto: MXCrypto,
      */
     private fun enableKeyBackup(keysVersionResult: KeysVersionResult) {
         if (keysVersionResult.authData != null) {
-            val retrievedMegolmBackupAuthData = keysVersionResult.getAuthDataAsMegolmBackupAuthData(cryptoUtil)
+            val retrievedMegolmBackupAuthData = keysVersionResult.getAuthDataAsMegolmBackupAuthData()
 
             if (retrievedMegolmBackupAuthData != null) {
                 mKeysBackupVersion = keysVersionResult
@@ -768,7 +770,7 @@ class KeysBackup(private val mCrypto: MXCrypto,
 
         var encryptedSessionBackupData: OlmPkMessage? = null
         try {
-            encryptedSessionBackupData = mBackupKey?.encrypt(cryptoUtil.getGson(false).toJson(sessionBackupData))
+            encryptedSessionBackupData = mBackupKey?.encrypt(JsonUtility.getGson(false).toJson(sessionBackupData))
         } catch (e: OlmException) {
             Log.e(LOG_TAG, "OlmException", e)
         }
@@ -789,7 +791,7 @@ class KeysBackup(private val mCrypto: MXCrypto,
                 "mac" to encryptedSessionBackupData.mMac,
                 "ephemeral" to encryptedSessionBackupData.mEphemeralKey)
 
-        keyBackupData.sessionData = cryptoUtil.getGson(false).toJsonTree(data)
+        keyBackupData.sessionData = JsonUtility.getGson(false).toJsonTree(data)
 
         return keyBackupData
     }
@@ -812,7 +814,7 @@ class KeysBackup(private val mCrypto: MXCrypto,
 
             try {
                 val decrypted = decryption.decrypt(encrypted)
-                sessionBackupData = cryptoUtil.toClass(decrypted, MegolmSessionData::class.java)
+                sessionBackupData = JsonUtility.toClass(decrypted, MegolmSessionData::class.java)
             } catch (e: OlmException) {
                 Log.e(LOG_TAG, "OlmException", e)
             }
@@ -824,6 +826,10 @@ class KeysBackup(private val mCrypto: MXCrypto,
         }
 
         return sessionBackupData
+    }
+
+    fun getRoomKeysRestClient(): RoomKeysRestClient {
+        return mRoomKeysRestClient
     }
 
     companion object {

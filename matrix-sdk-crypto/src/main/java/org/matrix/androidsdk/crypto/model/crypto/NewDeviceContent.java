@@ -15,12 +15,15 @@
  */
 package org.matrix.androidsdk.crypto.model.crypto;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 public class NewDeviceContent {
     private static final String LOG_TAG = "NewDeviceContent";
 
     // the device id
+    @SerializedName("device_id")
     public String deviceId;
 
     // the room ids list

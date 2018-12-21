@@ -33,8 +33,9 @@ import org.matrix.androidsdk.crypto.data.MXQueuedEncryption;
 import org.matrix.androidsdk.crypto.data.MXUsersDevicesMap;
 import org.matrix.androidsdk.crypto.interfaces.CryptoEvent;
 import org.matrix.androidsdk.crypto.interfaces.CryptoSession;
-import org.matrix.androidsdk.crypto.interfaces.CryptoUtil;
+import org.matrix.androidsdk.util.JsonUtility;
 import org.matrix.androidsdk.util.Log;
+import org.matrix.androidsdk.util.StringUtilsKt;
 import org.matrix.androidsdk.util.callback.ApiCallback;
 import org.matrix.androidsdk.util.callback.SimpleApiCallback;
 import org.matrix.androidsdk.util.model.MatrixError;
@@ -48,9 +49,7 @@ import java.util.Map;
 public class MXMegolmEncryption implements IMXEncrypting {
     private static final String LOG_TAG = MXMegolmEncryption.class.getSimpleName();
 
-    private CryptoSession mSession;
     private MXCrypto mCrypto;
-    private CryptoUtil mCryptoUtil;
 
     // The id of the room we will be sending to.
     private String mRoomId;
@@ -73,9 +72,7 @@ public class MXMegolmEncryption implements IMXEncrypting {
 
     @Override
     public void initWithMatrixSession(CryptoSession matrixSession, MXCrypto crypto, String roomId) {
-        mSession = matrixSession;
         mCrypto = crypto;
-        mCryptoUtil = crypto.getCryptoUtil();
 
         mRoomId = roomId;
         mDeviceId = matrixSession.getDeviceId();
@@ -491,7 +488,7 @@ public class MXMegolmEncryption implements IMXEncrypting {
                             final long t0 = System.currentTimeMillis();
                             Log.d(LOG_TAG, "## shareUserDevicesKey() : has target");
 
-                            mSession.getCryptoRestClient().sendToDevice(CryptoEvent.EVENT_TYPE_MESSAGE_ENCRYPTED, contentMap, new ApiCallback<Void>() {
+                            mCrypto.getCryptoRestClient().sendToDevice(CryptoEvent.EVENT_TYPE_MESSAGE_ENCRYPTED, contentMap, new ApiCallback<Void>() {
                                 @Override
                                 public void onSuccess(Void info) {
                                     mCrypto.getEncryptingThreadHandler().post(new Runnable() {
@@ -613,7 +610,7 @@ public class MXMegolmEncryption implements IMXEncrypting {
                 payloadJson.put("content", queuedEncryption.mEventContent);
 
                 String payloadString
-                        = mCryptoUtil.convertToUTF8(mCryptoUtil.canonicalize(mCryptoUtil.getGson(false).toJsonTree(payloadJson)).toString());
+                        = StringUtilsKt.convertToUTF8(JsonUtility.canonicalize(JsonUtility.getGson(false).toJsonTree(payloadJson)).toString());
                 String ciphertext = mCrypto.getOlmDevice().encryptGroupMessage(session.mSessionId, payloadString);
 
                 final Map<String, Object> map = new HashMap<>();
@@ -630,7 +627,7 @@ public class MXMegolmEncryption implements IMXEncrypting {
                 mCrypto.getUIHandler().post(new Runnable() {
                     @Override
                     public void run() {
-                        fQueuedEncryption.mApiCallback.onSuccess(mCryptoUtil.getGson(false).toJsonTree(map));
+                        fQueuedEncryption.mApiCallback.onSuccess(JsonUtility.getGson(false).toJsonTree(map));
                     }
                 });
 

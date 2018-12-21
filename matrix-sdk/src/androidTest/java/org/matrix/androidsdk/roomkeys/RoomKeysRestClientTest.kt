@@ -27,7 +27,6 @@ import org.matrix.androidsdk.common.*
 import org.matrix.androidsdk.crypto.MXCRYPTO_ALGORITHM_MEGOLM_BACKUP
 import org.matrix.androidsdk.crypto.keysbackup.MegolmBackupAuthData
 import org.matrix.androidsdk.crypto.model.keys.*
-import org.matrix.androidsdk.util.CryptoUtilImpl
 import org.matrix.androidsdk.util.JsonUtils
 import org.matrix.androidsdk.util.Log
 import org.matrix.androidsdk.util.model.MatrixError
@@ -140,7 +139,7 @@ class RoomKeysRestClientTest {
         assertEquals(version, keysVersionResult!!.version)
         assertEquals(createKeysBackupVersionBody.algorithm, keysVersionResult.algorithm)
 
-        val retrievedMegolmBackupAuthData = keysVersionResult.getAuthDataAsMegolmBackupAuthData(CryptoUtilImpl)
+        val retrievedMegolmBackupAuthData = keysVersionResult.getAuthDataAsMegolmBackupAuthData()
 
         assertEquals(megolmBackupAuthData.publicKey, retrievedMegolmBackupAuthData.publicKey)
         assertEquals(megolmBackupAuthData.signatures, retrievedMegolmBackupAuthData.signatures)

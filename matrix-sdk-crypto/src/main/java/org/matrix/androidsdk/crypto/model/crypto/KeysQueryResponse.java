@@ -17,6 +17,8 @@
 
 package org.matrix.androidsdk.crypto.model.crypto;
 
+import com.google.gson.annotations.SerializedName;
+
 import org.matrix.androidsdk.crypto.data.MXDeviceInfo;
 
 import java.util.Map;
@@ -28,6 +30,7 @@ public class KeysQueryResponse {
     /**
      * The device keys per devices per users.
      */
+    @SerializedName("device_keys")
     public Map<String, Map<String, MXDeviceInfo>> deviceKeys;
 
     /**

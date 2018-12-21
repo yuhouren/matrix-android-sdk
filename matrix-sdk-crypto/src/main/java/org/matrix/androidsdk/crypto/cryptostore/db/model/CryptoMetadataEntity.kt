@@ -20,7 +20,6 @@ import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
 import org.matrix.androidsdk.crypto.cryptostore.db.deserializeFromRealm
 import org.matrix.androidsdk.crypto.cryptostore.db.serializeForRealm
-import org.matrix.androidsdk.crypto.interfaces.CryptoUtil
 import org.matrix.olm.OlmAccount
 
 internal open class CryptoMetadataEntity(
@@ -45,7 +44,7 @@ internal open class CryptoMetadataEntity(
     }
 
     // Serialize data
-    fun putOlmAccount(olmAccount: OlmAccount?, cryptoUtil: CryptoUtil) {
-        olmAccountData = serializeForRealm(olmAccount, cryptoUtil)
+    fun putOlmAccount(olmAccount: OlmAccount?) {
+        olmAccountData = serializeForRealm(olmAccount)
     }
 }

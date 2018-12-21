@@ -24,7 +24,6 @@ import org.matrix.androidsdk.crypto.IncomingRoomKeyRequest
 import org.matrix.androidsdk.crypto.cryptostore.db.deserializeFromRealm
 import org.matrix.androidsdk.crypto.cryptostore.db.serializeForRealm
 import org.matrix.androidsdk.crypto.model.crypto.RoomKeyRequestBody
-import org.matrix.androidsdk.util.CryptoUtilImpl
 
 @FixMethodOrder(MethodSorters.JVM)
 class DbHelperTest {
@@ -45,7 +44,7 @@ class DbHelperTest {
             mRequestId = "requestId"
         }
 
-        val s = serializeForRealm(obj, CryptoUtilImpl)
+        val s = serializeForRealm(obj)
 
         assertTrue(s?.isNotEmpty() == true)
 

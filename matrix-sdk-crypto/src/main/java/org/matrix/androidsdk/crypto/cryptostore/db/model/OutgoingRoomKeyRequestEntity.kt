@@ -21,7 +21,6 @@ import io.realm.annotations.PrimaryKey
 import org.matrix.androidsdk.crypto.OutgoingRoomKeyRequest
 import org.matrix.androidsdk.crypto.cryptostore.db.deserializeFromRealm
 import org.matrix.androidsdk.crypto.cryptostore.db.serializeForRealm
-import org.matrix.androidsdk.crypto.interfaces.CryptoUtil
 
 internal open class OutgoingRoomKeyRequestEntity(
         @PrimaryKey var requestId: String? = null,
@@ -51,16 +50,16 @@ internal open class OutgoingRoomKeyRequestEntity(
         return deserializeFromRealm(recipientsData)
     }
 
-    fun putRecipients(recipients: List<MutableMap<String, String>>?, cryptoUtil: CryptoUtil) {
-        recipientsData = serializeForRealm(recipients, cryptoUtil)
+    fun putRecipients(recipients: List<MutableMap<String, String>>?) {
+        recipientsData = serializeForRealm(recipients)
     }
 
     fun getRequestBody(): Map<String, String>? {
         return deserializeFromRealm(requestBodyString)
     }
 
-    fun putRequestBody(requestBody: Map<String, String>?, cryptoUtil: CryptoUtil) {
-        requestBodyString = serializeForRealm(requestBody, cryptoUtil)
+    fun putRequestBody(requestBody: Map<String, String>?) {
+        requestBodyString = serializeForRealm(requestBody)
     }
 }
 

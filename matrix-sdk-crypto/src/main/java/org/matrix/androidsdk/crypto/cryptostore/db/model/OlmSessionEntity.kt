@@ -20,7 +20,6 @@ import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
 import org.matrix.androidsdk.crypto.cryptostore.db.deserializeFromRealm
 import org.matrix.androidsdk.crypto.cryptostore.db.serializeForRealm
-import org.matrix.androidsdk.crypto.interfaces.CryptoUtil
 import org.matrix.olm.OlmSession
 
 fun OlmSessionEntity.Companion.createPrimaryKey(sessionId: String, deviceKey: String) = "$sessionId|$deviceKey"
@@ -36,8 +35,8 @@ open class OlmSessionEntity(@PrimaryKey var primaryKey: String = "",
         return deserializeFromRealm(olmSessionData)
     }
 
-    fun putOlmSession(olmSession: OlmSession?, cryptoUtil: CryptoUtil) {
-        olmSessionData = serializeForRealm(olmSession, cryptoUtil)
+    fun putOlmSession(olmSession: OlmSession?) {
+        olmSessionData = serializeForRealm(olmSession)
     }
 
     companion object

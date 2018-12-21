@@ -20,6 +20,8 @@ package org.matrix.androidsdk.crypto.data;
 
 import android.text.TextUtils;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
@@ -45,11 +47,13 @@ public class MXDeviceInfo implements Serializable {
     /**
      * The id of this device.
      */
+    @SerializedName("device_id")
     public String deviceId;
 
     /**
      * the user id
      */
+    @SerializedName("user_id")
     public String userId;
 
     /**
@@ -219,7 +223,7 @@ public class MXDeviceInfo implements Serializable {
     }
 
     @Override
-    public java.lang.String toString() {
+    public String toString() {
         return "MXDeviceInfo " + userId + ":" + deviceId;
     }
 }

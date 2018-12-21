@@ -22,7 +22,6 @@ import android.os.Handler;
 import org.matrix.androidsdk.crypto.cryptostore.IMXCryptoStore;
 import org.matrix.androidsdk.crypto.data.MXUsersDevicesMap;
 import org.matrix.androidsdk.crypto.interfaces.CryptoEvent;
-import org.matrix.androidsdk.crypto.interfaces.CryptoSession;
 import org.matrix.androidsdk.crypto.model.crypto.RoomKeyRequest;
 import org.matrix.androidsdk.util.Log;
 import org.matrix.androidsdk.util.callback.ApiCallback;
@@ -39,8 +38,8 @@ public class MXOutgoingRoomKeyRequestManager {
 
     private static final int SEND_KEY_REQUESTS_DELAY_MS = 500;
 
-    // the linked session
-    private CryptoSession mSession;
+    // the linked crypto
+    private final MXCrypto mCrypto;
 
     // working handler (should not be the UI thread)
     private Handler mWorkingHandler;
@@ -61,11 +60,10 @@ public class MXOutgoingRoomKeyRequestManager {
     /**
      * Constructor
      *
-     * @param session the session
-     * @param crypto  the crypto engine
+     * @param crypto the crypto engine
      */
-    public MXOutgoingRoomKeyRequestManager(CryptoSession session, MXCrypto crypto) {
-        mSession = session;
+    public MXOutgoingRoomKeyRequestManager(MXCrypto crypto) {
+        mCrypto = crypto;
         mWorkingHandler = crypto.getEncryptingThreadHandler();
         mCryptoStore = crypto.getCryptoStore();
     }
@@ -366,6 +364,6 @@ public class MXOutgoingRoomKeyRequestManager {
             contentMap.setObject(message, recipient.get("userId"), recipient.get("deviceId"));
         }
 
-        mSession.getCryptoRestClient().sendToDevice(CryptoEvent.EVENT_TYPE_ROOM_KEY_REQUEST, contentMap, transactionId, callback);
+        mCrypto.getCryptoRestClient().sendToDevice(CryptoEvent.EVENT_TYPE_ROOM_KEY_REQUEST, contentMap, transactionId, callback);
     }
 }

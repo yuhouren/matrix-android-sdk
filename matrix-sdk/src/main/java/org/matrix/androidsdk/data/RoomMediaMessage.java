@@ -196,7 +196,7 @@ public class RoomMediaMessage implements Parcelable {
     }
 
     @Override
-    public java.lang.String toString() {
+    public String toString() {
         String description = "";
 
         description += "mUri " + mUri;

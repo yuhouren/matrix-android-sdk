@@ -25,7 +25,6 @@ import org.matrix.androidsdk.crypto.OutgoingRoomKeyRequest;
 import org.matrix.androidsdk.crypto.data.MXDeviceInfo;
 import org.matrix.androidsdk.crypto.data.MXOlmInboundGroupSession2;
 import org.matrix.androidsdk.crypto.interfaces.CryptoCredentials;
-import org.matrix.androidsdk.crypto.interfaces.CryptoUtil;
 import org.matrix.olm.OlmAccount;
 import org.matrix.olm.OlmSession;
 
@@ -43,7 +42,7 @@ public interface IMXCryptoStore {
      * @param context     the application context
      * @param credentials the credentials of the account.
      */
-    void initWithCredentials(Context context, CryptoCredentials credentials, CryptoUtil cryptoUtil);
+    void initWithCredentials(Context context, CryptoCredentials credentials);
 
     /**
      * @return if the store is corrupted.

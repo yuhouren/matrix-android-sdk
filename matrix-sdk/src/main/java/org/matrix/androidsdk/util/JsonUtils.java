@@ -22,14 +22,12 @@ import android.support.annotation.Nullable;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import org.matrix.androidsdk.crypto.model.crypto.EncryptedEventContent;
 import org.matrix.androidsdk.crypto.model.crypto.ForwardedRoomKeyContent;
 import org.matrix.androidsdk.crypto.model.crypto.OlmEventContent;
-import org.matrix.androidsdk.crypto.model.crypto.OlmPayloadContent;
 import org.matrix.androidsdk.crypto.model.crypto.RoomKeyContent;
 import org.matrix.androidsdk.crypto.model.crypto.RoomKeyRequest;
 import org.matrix.androidsdk.rest.json.BooleanDeserializer;
@@ -62,7 +60,6 @@ import org.matrix.androidsdk.util.model.MatrixError;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.Map;
-import java.util.TreeSet;
 
 /**
  * Static methods for converting json into objects.
@@ -92,17 +89,6 @@ public class JsonUtils {
             .setFieldNamingStrategy(new MatrixFieldNamingStrategy())
             .excludeFieldsWithModifiers(Modifier.PRIVATE, Modifier.STATIC)
             .serializeNulls()
-            .registerTypeAdapter(Condition.class, new ConditionDeserializer())
-            .registerTypeAdapter(boolean.class, new BooleanDeserializer(false))
-            .registerTypeAdapter(Boolean.class, new BooleanDeserializer(true))
-            .create();
-
-    // for crypto (canonicalize)
-    // avoid converting "=" to \u003d
-    private static final Gson gsonWithoutHtmlEscaping = new GsonBuilder()
-            .setFieldNamingStrategy(new MatrixFieldNamingStrategy())
-            .disableHtmlEscaping()
-            .excludeFieldsWithModifiers(Modifier.PRIVATE, Modifier.STATIC)
             .registerTypeAdapter(Condition.class, new ConditionDeserializer())
             .registerTypeAdapter(boolean.class, new BooleanDeserializer(false))
             .registerTypeAdapter(Boolean.class, new BooleanDeserializer(true))
@@ -283,17 +269,6 @@ public class JsonUtils {
      */
     public static OlmEventContent toOlmEventContent(JsonElement jsonObject) {
         return toClass(jsonObject, OlmEventContent.class);
-    }
-
-    /**
-     * Convert a JSON object to an OlmPayloadContent.
-     * The result is never null.
-     *
-     * @param jsonObject the json to convert
-     * @return an OlmPayloadContent
-     */
-    public static OlmPayloadContent toOlmPayloadContent(JsonElement jsonObject) {
-        return toClass(jsonObject, OlmPayloadContent.class);
     }
 
     /**
@@ -566,110 +541,6 @@ public class JsonUtils {
         }
 
         return null;
-    }
-
-    /**
-     * Create a canonicalized json string for an object
-     *
-     * @param object the object to convert
-     * @return the canonicalized string
-     */
-    public static String getCanonicalizedJsonString(Object object) {
-        String canonicalizedJsonString = null;
-
-        if (null != object) {
-            if (object instanceof JsonElement) {
-                canonicalizedJsonString = gsonWithoutHtmlEscaping.toJson(canonicalize((JsonElement) object));
-            } else {
-                canonicalizedJsonString = gsonWithoutHtmlEscaping.toJson(canonicalize(gsonWithoutHtmlEscaping.toJsonTree(object)));
-            }
-
-            if (null != canonicalizedJsonString) {
-                canonicalizedJsonString = canonicalizedJsonString.replace("\\/", "/");
-            }
-        }
-
-        return canonicalizedJsonString;
-    }
-
-    /**
-     * Canonicalize a JsonElement element
-     *
-     * @param src the src
-     * @return the canonicalize element
-     */
-    public static JsonElement canonicalize(JsonElement src) {
-        // sanity check
-        if (null == src) {
-            return null;
-        }
-
-        if (src instanceof JsonArray) {
-            // Canonicalize each element of the array
-            JsonArray srcArray = (JsonArray) src;
-            JsonArray result = new JsonArray();
-            for (int i = 0; i < srcArray.size(); i++) {
-                result.add(canonicalize(srcArray.get(i)));
-            }
-            return result;
-        } else if (src instanceof JsonObject) {
-            // Sort the attributes by name, and the canonicalize each element of the object
-            JsonObject srcObject = (JsonObject) src;
-            JsonObject result = new JsonObject();
-            TreeSet<String> attributes = new TreeSet<>();
-
-            for (Map.Entry<String, JsonElement> entry : srcObject.entrySet()) {
-                attributes.add(entry.getKey());
-            }
-            for (String attribute : attributes) {
-                result.add(attribute, canonicalize(srcObject.get(attribute)));
-            }
-            return result;
-        } else {
-            return src;
-        }
-    }
-
-    /**
-     * Convert a string from an UTF8 String
-     *
-     * @param s the string to convert
-     * @return the utf-16 string
-     */
-    public static String convertFromUTF8(String s) {
-        String out = s;
-
-        if (null != out) {
-            try {
-                byte[] bytes = out.getBytes();
-                out = new String(bytes, "UTF-8");
-            } catch (Exception e) {
-                Log.e(LOG_TAG, "## convertFromUTF8()  failed " + e.getMessage(), e);
-            }
-        }
-
-        return out;
-    }
-
-    /**
-     * Convert a string to an UTF8 String
-     *
-     * @param s the string to convert
-     * @return the utf-8 string
-     */
-    public static String convertToUTF8(String s) {
-        String out = s;
-
-        if (null != out) {
-            try {
-                byte[] bytes = out.getBytes("UTF-8");
-                out = new String(bytes);
-            } catch (Exception e) {
-                Log.e(LOG_TAG, "## convertToUTF8()  failed " + e.getMessage(), e);
-            }
-        }
-
-        return out;
     }
 
     /**

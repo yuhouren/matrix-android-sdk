@@ -30,7 +30,8 @@ import org.matrix.androidsdk.crypto.data.MXOlmInboundGroupSession;
 import org.matrix.androidsdk.crypto.data.MXOlmInboundGroupSession2;
 import org.matrix.androidsdk.crypto.data.MXUsersDevicesMap;
 import org.matrix.androidsdk.crypto.interfaces.CryptoCredentials;
-import org.matrix.androidsdk.crypto.interfaces.CryptoUtil;
+import org.matrix.androidsdk.util.CompatUtil;
+import org.matrix.androidsdk.util.FileContentUtils;
 import org.matrix.androidsdk.util.Log;
 import org.matrix.olm.OlmAccount;
 import org.matrix.olm.OlmSession;
@@ -168,7 +169,6 @@ public class MXFileCryptoStore implements IMXCryptoStore {
     private boolean mIsReady = false;
 
     private Context mContext;
-    private CryptoUtil mCryptoUtil;
 
     // True if file encryption is enabled
     private final boolean mEnableFileEncryption;
@@ -183,9 +183,8 @@ public class MXFileCryptoStore implements IMXCryptoStore {
     }
 
     @Override
-    public void initWithCredentials(Context context, CryptoCredentials credentials, CryptoUtil cryptoUtil) {
+    public void initWithCredentials(Context context, CryptoCredentials credentials) {
         mCredentials = credentials;
-        mCryptoUtil = cryptoUtil;
 
         mStoreFile = new File(new File(context.getApplicationContext().getFilesDir(), MXFILE_CRYPTO_STORE_FOLDER), mCredentials.getUserId());
 
@@ -265,7 +264,7 @@ public class MXFileCryptoStore implements IMXCryptoStore {
     public void deleteStore() {
         // delete the dedicated directories
         try {
-            mCryptoUtil.deleteDirectory(mStoreFile);
+            FileContentUtils.deleteDirectory(mStoreFile);
         } catch (Exception e) {
             Log.e(LOG_TAG, "deleteStore failed " + e.getMessage(), e);
         }
@@ -402,11 +401,11 @@ public class MXFileCryptoStore implements IMXCryptoStore {
                 FileOutputStream fos = new FileOutputStream(file);
                 OutputStream cos;
                 if (mEnableFileEncryption) {
-                    cos = mCryptoUtil.createCipherOutputStream(fos, mContext);
+                    cos = CompatUtil.createCipherOutputStream(fos, mContext);
                 } else {
                     cos = fos;
                 }
-                GZIPOutputStream gz = mCryptoUtil.createGzipOutputStream(cos);
+                GZIPOutputStream gz = CompatUtil.createGzipOutputStream(cos);
                 ObjectOutputStream out = new ObjectOutputStream(gz);
 
                 out.writeObject(object);
@@ -1205,7 +1204,7 @@ public class MXFileCryptoStore implements IMXCryptoStore {
                 FileInputStream fis = new FileInputStream(file);
                 InputStream cis;
                 if (mEnableFileEncryption) {
-                    cis = mCryptoUtil.createCipherInputStream(fis, mContext);
+                    cis = CompatUtil.createCipherInputStream(fis, mContext);
 
                     if (cis == null) {
                         // fallback to unencrypted stream for backward compatibility

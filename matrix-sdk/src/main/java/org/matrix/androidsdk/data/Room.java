@@ -39,7 +39,6 @@ import com.google.gson.reflect.TypeToken;
 
 import org.jetbrains.annotations.NotNull;
 import org.matrix.androidsdk.MXDataHandler;
-import org.matrix.androidsdk.MXPatterns;
 import org.matrix.androidsdk.R;
 import org.matrix.androidsdk.call.MXCallsManager;
 import org.matrix.androidsdk.crypto.MXCryptoError;
@@ -81,6 +80,7 @@ import org.matrix.androidsdk.rest.model.sync.RoomSync;
 import org.matrix.androidsdk.util.ImageUtils;
 import org.matrix.androidsdk.util.JsonUtils;
 import org.matrix.androidsdk.util.Log;
+import org.matrix.androidsdk.util.MXPatterns;
 import org.matrix.androidsdk.util.callback.ApiCallback;
 import org.matrix.androidsdk.util.callback.SimpleApiCallback;
 import org.matrix.androidsdk.util.model.MatrixError;

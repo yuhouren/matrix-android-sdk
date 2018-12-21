@@ -20,7 +20,6 @@ import io.realm.RealmObject
 import org.matrix.androidsdk.crypto.IncomingRoomKeyRequest
 import org.matrix.androidsdk.crypto.cryptostore.db.deserializeFromRealm
 import org.matrix.androidsdk.crypto.cryptostore.db.serializeForRealm
-import org.matrix.androidsdk.crypto.interfaces.CryptoUtil
 import org.matrix.androidsdk.crypto.model.crypto.RoomKeyRequestBody
 
 internal open class IncomingRoomKeyRequestEntity(
@@ -44,7 +43,7 @@ internal open class IncomingRoomKeyRequestEntity(
         return deserializeFromRealm(requestBodyString)
     }
 
-    fun putRequestBody(requestBody: RoomKeyRequestBody?, cryptoUtil: CryptoUtil) {
-        requestBodyString = serializeForRealm(requestBody, cryptoUtil)
+    fun putRequestBody(requestBody: RoomKeyRequestBody?) {
+        requestBodyString = serializeForRealm(requestBody)
     }
 }

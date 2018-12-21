@@ -27,7 +27,6 @@ import android.util.Base64;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import org.matrix.androidsdk.MXPatterns;
 import org.matrix.androidsdk.MXSession;
 import org.matrix.androidsdk.crypto.MXCryptoError;
 import org.matrix.androidsdk.crypto.data.MXDeviceInfo;
@@ -43,6 +42,7 @@ import org.matrix.androidsdk.rest.model.EventContent;
 import org.matrix.androidsdk.rest.model.RoomMember;
 import org.matrix.androidsdk.util.JsonUtils;
 import org.matrix.androidsdk.util.Log;
+import org.matrix.androidsdk.util.MXPatterns;
 import org.matrix.androidsdk.util.callback.ApiCallback;
 import org.matrix.androidsdk.util.callback.SimpleApiCallback;
 import org.matrix.androidsdk.util.model.MatrixError;

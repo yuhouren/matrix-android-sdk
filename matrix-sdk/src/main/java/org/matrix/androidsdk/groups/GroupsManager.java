@@ -22,7 +22,6 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import org.matrix.androidsdk.MXDataHandler;
-import org.matrix.androidsdk.MXPatterns;
 import org.matrix.androidsdk.data.store.IMXStore;
 import org.matrix.androidsdk.rest.client.GroupsRestClient;
 import org.matrix.androidsdk.rest.model.RoomMember;
@@ -34,6 +33,7 @@ import org.matrix.androidsdk.rest.model.group.GroupSummary;
 import org.matrix.androidsdk.rest.model.group.GroupSyncProfile;
 import org.matrix.androidsdk.rest.model.group.GroupUsers;
 import org.matrix.androidsdk.util.Log;
+import org.matrix.androidsdk.util.MXPatterns;
 import org.matrix.androidsdk.util.callback.ApiCallback;
 import org.matrix.androidsdk.util.callback.SimpleApiCallback;
 import org.matrix.androidsdk.util.model.MatrixError;

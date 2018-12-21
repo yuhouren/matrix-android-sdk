@@ -23,18 +23,19 @@ import org.matrix.androidsdk.RestClient;
 import org.matrix.androidsdk.crypto.model.crypto.EncryptedBodyFileInfo;
 import org.matrix.androidsdk.data.store.IMXStore;
 import org.matrix.androidsdk.rest.api.MediaScanApi;
-import org.matrix.androidsdk.rest.callback.DefaultRetrofit2CallbackWrapper;
 import org.matrix.androidsdk.rest.model.EncryptedMediaScanBody;
 import org.matrix.androidsdk.rest.model.EncryptedMediaScanEncryptedBody;
-import org.matrix.androidsdk.rest.model.HttpError;
-import org.matrix.androidsdk.rest.model.HttpException;
 import org.matrix.androidsdk.rest.model.MediaScanError;
 import org.matrix.androidsdk.rest.model.MediaScanPublicKeyResult;
 import org.matrix.androidsdk.rest.model.MediaScanResult;
+import org.matrix.androidsdk.util.JsonUtility;
 import org.matrix.androidsdk.util.JsonUtils;
 import org.matrix.androidsdk.util.callback.ApiCallback;
 import org.matrix.androidsdk.util.callback.SimpleApiCallback;
+import org.matrix.androidsdk.util.model.HttpError;
+import org.matrix.androidsdk.util.model.HttpException;
 import org.matrix.androidsdk.util.model.MatrixError;
+import org.matrix.androidsdk.util.rest.DefaultRetrofit2CallbackWrapper;
 import org.matrix.olm.OlmException;
 import org.matrix.olm.OlmPkEncryption;
 import org.matrix.olm.OlmPkMessage;
@@ -153,7 +154,7 @@ public class MediaScanRestClient extends RestClient<MediaScanApi> {
                         OlmPkEncryption olmPkEncryption = new OlmPkEncryption();
                         olmPkEncryption.setRecipientKey(serverPublicKey);
 
-                        String data = JsonUtils.getCanonicalizedJsonString(encryptedMediaScanBody);
+                        String data = JsonUtility.getCanonicalizedJsonString(encryptedMediaScanBody);
 
                         OlmPkMessage message = olmPkEncryption.encrypt(data);
 

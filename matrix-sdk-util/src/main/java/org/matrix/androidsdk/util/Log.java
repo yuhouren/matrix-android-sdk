@@ -50,7 +50,7 @@ public class Log {
     private static File sCacheDirectory = null;
     private static String sFileName = "matrix";
 
-    // determine if messsages with DEBUG level should be logged or not
+    // determine if messages with DEBUG level should be logged or not
     public static boolean sShouldLogDebug = BuildConfig.DEBUG;
 
     public enum EventTag {

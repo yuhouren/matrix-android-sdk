@@ -17,6 +17,7 @@ package org.matrix.androidsdk.crypto.model.crypto;
 
 import org.matrix.olm.OlmPkMessage;
 
+// TODO Move to crypto
 public class EncryptedBodyFileInfo {
     public String ciphertext;
     public String mac;

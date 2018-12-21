@@ -40,7 +40,7 @@ import org.matrix.androidsdk.rest.model.group.Group;
 import org.matrix.androidsdk.rest.model.pid.ThirdPartyIdentifier;
 import org.matrix.androidsdk.rest.model.sync.AccountData;
 import org.matrix.androidsdk.util.CompatUtil;
-import org.matrix.androidsdk.util.ContentUtils;
+import org.matrix.androidsdk.util.FileContentUtils;
 import org.matrix.androidsdk.util.Log;
 import org.matrix.androidsdk.util.MXOsHandler;
 import org.matrix.androidsdk.util.callback.ApiCallback;
@@ -684,7 +684,7 @@ public class MXFileStore extends MXMemoryStore {
     private void deleteAllData(boolean init) {
         // delete the dedicated directories
         try {
-            ContentUtils.deleteDirectory(mStoreFolderFile);
+            FileContentUtils.deleteDirectory(mStoreFolderFile);
             if (init) {
                 createDirTree(mCredentials.userId);
             }

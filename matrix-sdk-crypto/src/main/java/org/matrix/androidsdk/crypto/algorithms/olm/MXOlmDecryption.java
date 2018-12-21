@@ -31,10 +31,11 @@ import org.matrix.androidsdk.crypto.MXOlmDevice;
 import org.matrix.androidsdk.crypto.algorithms.IMXDecrypting;
 import org.matrix.androidsdk.crypto.interfaces.CryptoEvent;
 import org.matrix.androidsdk.crypto.interfaces.CryptoSession;
-import org.matrix.androidsdk.crypto.interfaces.CryptoUtil;
 import org.matrix.androidsdk.crypto.model.crypto.OlmEventContent;
 import org.matrix.androidsdk.crypto.model.crypto.OlmPayloadContent;
+import org.matrix.androidsdk.util.JsonUtility;
 import org.matrix.androidsdk.util.Log;
+import org.matrix.androidsdk.util.StringUtilsKt;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,13 +54,10 @@ public class MXOlmDecryption implements IMXDecrypting {
     // the matrix session
     private CryptoSession mSession;
 
-    private CryptoUtil mCryptoUtil;
-
     @Override
     public void initWithMatrixSession(CryptoSession matrixSession, MXCrypto crypto) {
         mSession = matrixSession;
         mOlmDevice = crypto.getOlmDevice();
-        mCryptoUtil = crypto.getCryptoUtil();
     }
 
     @Override
@@ -97,7 +95,7 @@ public class MXOlmDecryption implements IMXDecrypting {
                     MXCryptoError.UNABLE_TO_DECRYPT, MXCryptoError.BAD_ENCRYPTED_MESSAGE_REASON));
         }
 
-        JsonElement payload = new JsonParser().parse(mCryptoUtil.convertFromUTF8(payloadString));
+        JsonElement payload = new JsonParser().parse(StringUtilsKt.convertFromUTF8(payloadString));
 
         if (null == payload) {
             Log.e(LOG_TAG, "## decryptEvent failed : null payload");
@@ -105,7 +103,7 @@ public class MXOlmDecryption implements IMXDecrypting {
                     MXCryptoError.UNABLE_TO_DECRYPT, MXCryptoError.MISSING_CIPHER_TEXT_REASON));
         }
 
-        OlmPayloadContent olmPayloadContent = mCryptoUtil.toOlmPayloadContent(payload);
+        OlmPayloadContent olmPayloadContent = JsonUtility.toClass(payload, OlmPayloadContent.class);
 
         if (TextUtils.isEmpty(olmPayloadContent.recipient)) {
             String reason = String.format(MXCryptoError.ERROR_MISSING_PROPERTY_REASON, "recipient");

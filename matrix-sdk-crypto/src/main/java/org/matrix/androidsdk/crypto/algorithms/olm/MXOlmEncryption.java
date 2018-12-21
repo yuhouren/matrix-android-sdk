@@ -28,6 +28,7 @@ import org.matrix.androidsdk.crypto.data.MXDeviceInfo;
 import org.matrix.androidsdk.crypto.data.MXOlmSessionResult;
 import org.matrix.androidsdk.crypto.data.MXUsersDevicesMap;
 import org.matrix.androidsdk.crypto.interfaces.CryptoSession;
+import org.matrix.androidsdk.util.JsonUtility;
 import org.matrix.androidsdk.util.callback.ApiCallback;
 import org.matrix.androidsdk.util.callback.SimpleApiCallback;
 
@@ -97,7 +98,7 @@ public class MXOlmEncryption implements IMXEncrypting {
                         messageMap.put("content", eventContent);
 
                         mCrypto.encryptMessage(messageMap, deviceInfos);
-                        callback.onSuccess(mCrypto.getCryptoUtil().getGson(false).toJsonTree(messageMap));
+                        callback.onSuccess(JsonUtility.getGson(false).toJsonTree(messageMap));
                     }
                 }
         );

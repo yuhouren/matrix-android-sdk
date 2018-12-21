@@ -29,8 +29,7 @@ import android.util.Pair;
 import com.facebook.stetho.okhttp3.StethoInterceptor;
 import com.google.gson.Gson;
 
-import org.matrix.androidsdk.interceptors.CurlLoggingInterceptor;
-import org.matrix.androidsdk.interceptors.FormattedJsonHttpLogger;
+import org.matrix.androidsdk.crypto.rest.ParentRestClient;
 import org.matrix.androidsdk.network.NetworkConnectivityReceiver;
 import org.matrix.androidsdk.rest.client.MXRestExecutorService;
 import org.matrix.androidsdk.rest.model.login.Credentials;
@@ -39,6 +38,8 @@ import org.matrix.androidsdk.util.JsonUtils;
 import org.matrix.androidsdk.util.Log;
 import org.matrix.androidsdk.util.PolymorphicRequestBodyConverter;
 import org.matrix.androidsdk.util.UnsentEventsManager;
+import org.matrix.androidsdk.util.interceptors.CurlLoggingInterceptor;
+import org.matrix.androidsdk.util.interceptors.FormattedJsonHttpLogger;
 import org.matrix.androidsdk.util.listeners.IMXNetworkEventListener;
 
 import java.io.IOException;
@@ -172,7 +173,7 @@ public class RestClient<T> {
 
         if (BuildConfig.DEBUG) {
             HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor(new FormattedJsonHttpLogger());
-            loggingInterceptor.setLevel(BuildConfig.OKHTTP_LOGGING_LEVEL);
+            loggingInterceptor.setLevel(org.matrix.androidsdk.util.BuildConfig.OKHTTP_LOGGING_LEVEL);
 
             okHttpClientBuilder
                     .addInterceptor(loggingInterceptor)
@@ -293,6 +294,8 @@ public class RestClient<T> {
                     "; Flavour " + flavorDescription +
                     "; MatrixAndroidSDK " + BuildConfig.VERSION_NAME + ")";
         }
+
+        ParentRestClient.initUserAgent(sUserAgent);
     }
 
     /**

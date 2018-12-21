@@ -48,13 +48,15 @@ import org.matrix.androidsdk.crypto.interfaces.CryptoRoomMember;
 import org.matrix.androidsdk.crypto.interfaces.CryptoRoomState;
 import org.matrix.androidsdk.crypto.interfaces.CryptoSession;
 import org.matrix.androidsdk.crypto.interfaces.CryptoSyncResponse;
-import org.matrix.androidsdk.crypto.interfaces.CryptoUtil;
 import org.matrix.androidsdk.crypto.keysbackup.KeysBackup;
 import org.matrix.androidsdk.crypto.model.crypto.KeysUploadResponse;
 import org.matrix.androidsdk.crypto.model.crypto.RoomKeyContent;
 import org.matrix.androidsdk.crypto.model.crypto.RoomKeyRequest;
 import org.matrix.androidsdk.crypto.model.crypto.RoomKeyRequestBody;
+import org.matrix.androidsdk.crypto.rest.CryptoRestClient;
+import org.matrix.androidsdk.util.JsonUtility;
 import org.matrix.androidsdk.util.Log;
+import org.matrix.androidsdk.util.StringUtilsKt;
 import org.matrix.androidsdk.util.callback.ApiCallback;
 import org.matrix.androidsdk.util.callback.SimpleApiCallback;
 import org.matrix.androidsdk.util.listeners.IMXNetworkEventListener;
@@ -70,6 +72,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+
+import retrofit2.Converter;
 
 /**
  * A `MXCrypto` class instance manages the end-to-end crypto for a MXSession instance.
@@ -94,9 +98,6 @@ public class MXCrypto {
 
     // The Matrix session.
     private final CryptoSession mSession;
-
-    @NonNull
-    private final CryptoUtil mCryptoUtil;
 
     // the crypto store
     public IMXCryptoStore mCryptoStore;
@@ -138,6 +139,8 @@ public class MXCrypto {
     private Integer mOneTimeKeyCount;
 
     private final MXDeviceList mDevicesList;
+
+    private final CryptoRestClient mCryptoRestClient;
 
     private final MXOutgoingRoomKeyRequestManager mOutgoingRoomKeyRequestManager;
 
@@ -204,10 +207,13 @@ public class MXCrypto {
     public MXCrypto(@NonNull CryptoSession matrixSession,
                     @NonNull IMXCryptoStore cryptoStore,
                     @Nullable MXCryptoConfig cryptoConfig,
-                    @NonNull CryptoUtil cryptoUtil) {
+                    String homeServerUrl,
+                    String accessToken,
+                    Converter.Factory converterFactory) {
         mSession = matrixSession;
         mCryptoStore = cryptoStore;
-        mCryptoUtil = cryptoUtil;
+
+        mCryptoRestClient = new CryptoRestClient(homeServerUrl, accessToken, converterFactory);
 
         if (null != cryptoConfig) {
             mCryptoConfig = cryptoConfig;
@@ -216,7 +222,7 @@ public class MXCrypto {
             mCryptoConfig = new MXCryptoConfig();
         }
 
-        mOlmDevice = new MXOlmDevice(mCryptoStore, cryptoUtil);
+        mOlmDevice = new MXOlmDevice(mCryptoStore);
         mRoomEncryptors = new HashMap<>();
         mRoomDecryptors = new HashMap<>();
 
@@ -287,11 +293,11 @@ public class MXCrypto {
             mDevicesList.handleDeviceListsChanges(Arrays.asList(mSession.getMyUserId()), null);
         }
 
-        mOutgoingRoomKeyRequestManager = new MXOutgoingRoomKeyRequestManager(mSession, this);
+        mOutgoingRoomKeyRequestManager = new MXOutgoingRoomKeyRequestManager(this);
 
         mReceivedRoomKeyRequests.addAll(mCryptoStore.getPendingIncomingRoomKeyRequests());
 
-        mKeysBackup = new KeysBackup(this, mSession, mCryptoUtil);
+        mKeysBackup = new KeysBackup(this, homeServerUrl, accessToken, converterFactory);
     }
 
     /**
@@ -1076,7 +1082,7 @@ public class MXCrypto {
 
         Log.d(LOG_TAG, "## claimOneTimeKeysForUsersDevices() : " + usersDevicesToClaim);
 
-        mSession.getCryptoRestClient().claimOneTimeKeysForUsersDevices(usersDevicesToClaim, new ApiCallback<MXUsersDevicesMap<MXKey>>() {
+        mCryptoRestClient.claimOneTimeKeysForUsersDevices(usersDevicesToClaim, new ApiCallback<MXUsersDevicesMap<MXKey>>() {
             @Override
             public void onSuccess(final MXUsersDevicesMap<MXKey> oneTimeKeys) {
                 getEncryptingThreadHandler().post(new Runnable() {
@@ -1504,7 +1510,7 @@ public class MXCrypto {
                 payloadJson.put("recipient_keys", recipientsKeysMap);
 
 
-                String payloadString = mCryptoUtil.convertToUTF8(mCryptoUtil.canonicalize(mCryptoUtil.getGson(false).toJsonTree(payloadJson)).toString());
+                String payloadString = StringUtilsKt.convertToUTF8(JsonUtility.canonicalize(JsonUtility.getGson(false).toJsonTree(payloadJson)).toString());
                 ciphertext.put(deviceKey, mOlmDevice.encryptMessage(deviceKey, sessionId, payloadString));
             }
         }
@@ -1879,11 +1885,11 @@ public class MXCrypto {
     private void uploadDeviceKeys(ApiCallback<KeysUploadResponse> callback) {
         // Prepare the device keys data to send
         // Sign it
-        mMyDevice.signatures = signObject(mCryptoUtil.getCanonicalizedJsonString(mMyDevice.signalableJSONDictionary()));
+        mMyDevice.signatures = signObject(JsonUtility.getCanonicalizedJsonString(mMyDevice.signalableJSONDictionary()));
 
         // For now, we set the device id explicitly, as we may not be using the
         // same one as used in login.
-        mSession.getCryptoRestClient().uploadKeys(mMyDevice.JSONDictionary(), null, mMyDevice.deviceId, callback);
+        mCryptoRestClient.uploadKeys(mMyDevice.JSONDictionary(), null, mMyDevice.deviceId, callback);
     }
 
     /**
@@ -1992,7 +1998,7 @@ public class MXCrypto {
             uploadOTK(mOneTimeKeyCount, keyLimit, callback);
         } else {
             // ask the server how many keys we have
-            mSession.getCryptoRestClient().uploadKeys(null, null, mMyDevice.deviceId, new ApiCallback<KeysUploadResponse>() {
+            mCryptoRestClient.uploadKeys(null, null, mMyDevice.deviceId, new ApiCallback<KeysUploadResponse>() {
                 private void onFailed(String errorMessage) {
                     if (null != errorMessage) {
                         Log.e(LOG_TAG, "## uploadKeys() : failed " + errorMessage);
@@ -2163,7 +2169,7 @@ public class MXCrypto {
                 k.put("key", curve25519Map.get(key_id));
 
                 // the key is also signed
-                k.put("signatures", signObject(mCryptoUtil.getCanonicalizedJsonString(k)));
+                k.put("signatures", signObject(JsonUtility.getCanonicalizedJsonString(k)));
 
                 oneTimeJson.put("signed_curve25519:" + key_id, k);
             }
@@ -2171,7 +2177,7 @@ public class MXCrypto {
 
         // For now, we set the device id explicitly, as we may not be using the
         // same one as used in login.
-        mSession.getCryptoRestClient().uploadKeys(null, oneTimeJson, mMyDevice.deviceId, new SimpleApiCallback<KeysUploadResponse>(callback) {
+        mCryptoRestClient.uploadKeys(null, oneTimeJson, mMyDevice.deviceId, new SimpleApiCallback<KeysUploadResponse>(callback) {
             @Override
             public void onSuccess(final KeysUploadResponse info) {
                 getEncryptingThreadHandler().post(new Runnable() {
@@ -2307,7 +2313,7 @@ public class MXCrypto {
 
                 try {
                     encryptedRoomKeys = MXMegolmExportEncryption
-                            .encryptMegolmKeyFile(mCryptoUtil.getGson(false).toJsonTree(exportedSessions).toString(), password, iterationCount);
+                            .encryptMegolmKeyFile(JsonUtility.getGson(false).toJsonTree(exportedSessions).toString(), password, iterationCount);
                 } catch (Exception e) {
                     callback.onUnexpectedError(e);
                     return;
@@ -2360,7 +2366,7 @@ public class MXCrypto {
                 Log.d(LOG_TAG, "## importRoomKeys : decryptMegolmKeyFile done in " + (t1 - t0) + " ms");
 
                 try {
-                    importedSessions = mCryptoUtil.getGson(false).fromJson(roomKeys, new TypeToken<List<MegolmSessionData>>() {
+                    importedSessions = JsonUtility.getGson(false).fromJson(roomKeys, new TypeToken<List<MegolmSessionData>>() {
                     }.getType());
                 } catch (final Exception e) {
                     Log.e(LOG_TAG, "## importRoomKeys failed " + e.getMessage(), e);
@@ -2749,9 +2755,8 @@ public class MXCrypto {
         }
     }
 
-    @NonNull
-    public CryptoUtil getCryptoUtil() {
-        return mCryptoUtil;
+    public CryptoRestClient getCryptoRestClient() {
+        return mCryptoRestClient;
     }
 
     /**

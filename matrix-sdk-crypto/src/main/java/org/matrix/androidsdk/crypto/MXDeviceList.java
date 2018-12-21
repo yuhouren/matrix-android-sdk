@@ -25,6 +25,7 @@ import org.matrix.androidsdk.crypto.data.MXUsersDevicesMap;
 import org.matrix.androidsdk.crypto.interfaces.CryptoSession;
 import org.matrix.androidsdk.crypto.model.crypto.KeysQueryResponse;
 import org.matrix.androidsdk.util.Log;
+import org.matrix.androidsdk.util.MXPatterns;
 import org.matrix.androidsdk.util.callback.ApiCallback;
 import org.matrix.androidsdk.util.model.MatrixError;
 
@@ -177,7 +178,7 @@ public class MXDeviceList {
             List<String> invalidUserIds = new ArrayList<>();
 
             for (String userId : userIds) {
-                if (mxCrypto.getCryptoUtil().isUserId(userId)) {
+                if (MXPatterns.isUserId(userId)) {
                     filteredUserIds.add(userId);
                 } else {
                     Log.e(LOG_TAG, "## userId " + userId + "is not a valid user id");
@@ -537,7 +538,7 @@ public class MXDeviceList {
             mPendingDownloadKeysRequestToken.put(userId, downloadToken);
         }
 
-        mxSession.getCryptoRestClient()
+        mxCrypto.getCryptoRestClient()
                 .downloadKeysForUsers(filteredUsers, mxSession.getDataHandler().getStore().getEventStreamToken(), new ApiCallback<KeysQueryResponse>() {
                     @Override
                     public void onSuccess(final KeysQueryResponse keysQueryResponse) {

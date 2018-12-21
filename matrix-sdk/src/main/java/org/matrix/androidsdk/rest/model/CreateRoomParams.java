@@ -23,11 +23,11 @@ import android.text.TextUtils;
 import com.google.gson.annotations.SerializedName;
 
 import org.matrix.androidsdk.HomeServerConnectionConfig;
-import org.matrix.androidsdk.MXPatterns;
 import org.matrix.androidsdk.data.RoomState;
 import org.matrix.androidsdk.rest.model.pid.Invite3Pid;
 import org.matrix.androidsdk.rest.model.pid.ThreePid;
 import org.matrix.androidsdk.util.JsonUtils;
+import org.matrix.androidsdk.util.MXPatterns;
 
 import java.util.ArrayList;
 import java.util.Arrays;

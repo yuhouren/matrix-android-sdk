@@ -73,5 +73,6 @@ data class MegolmSessionData(
          * Devices which forwarded this session to us (normally empty).
          */
         @JvmField
+        @SerializedName("forwarding_curve25519_key_chain")
         var forwardingCurve25519KeyChain: List<String>? = null
 )

@@ -25,8 +25,9 @@ import com.google.gson.JsonParser;
 import org.matrix.androidsdk.crypto.algorithms.MXDecryptionResult;
 import org.matrix.androidsdk.crypto.cryptostore.IMXCryptoStore;
 import org.matrix.androidsdk.crypto.data.MXOlmInboundGroupSession2;
-import org.matrix.androidsdk.crypto.interfaces.CryptoUtil;
+import org.matrix.androidsdk.util.JsonUtility;
 import org.matrix.androidsdk.util.Log;
+import org.matrix.androidsdk.util.StringUtilsKt;
 import org.matrix.olm.OlmAccount;
 import org.matrix.olm.OlmInboundGroupSession;
 import org.matrix.olm.OlmMessage;
@@ -85,16 +86,13 @@ public class MXOlmDevice {
      */
     private MXCryptoError mInboundGroupSessionWithIdError = null;
 
-    private final CryptoUtil mCryptoUtil;
-
     /**
      * Constructor
      *
      * @param store the used store
      */
-    public MXOlmDevice(IMXCryptoStore store, CryptoUtil cryptoUtil) {
+    public MXOlmDevice(IMXCryptoStore store) {
         mStore = store;
-        mCryptoUtil = cryptoUtil;
 
         // Retrieve the account from the store
         mOlmAccount = mStore.getAccount();
@@ -685,7 +683,7 @@ public class MXOlmDevice {
                     mStore.storeInboundGroupSession(session);
                     try {
                         JsonParser parser = new JsonParser();
-                        result.mPayload = parser.parse(mCryptoUtil.convertFromUTF8(decryptResult.mDecryptedMessage));
+                        result.mPayload = parser.parse(StringUtilsKt.convertFromUTF8(decryptResult.mDecryptedMessage));
                     } catch (Exception e) {
                         Log.e(LOG_TAG, "## decryptGroupMessage() : RLEncoder.encode failed " + e.getMessage(), e);
                         return null;
@@ -740,7 +738,7 @@ public class MXOlmDevice {
      */
     public void verifySignature(String key, Map<String, Object> JSONDictionary, String signature) throws Exception {
         // Check signature on the canonical version of the JSON
-        mOlmUtility.verifyEd25519Signature(signature, key, mCryptoUtil.getCanonicalizedJsonString(JSONDictionary));
+        mOlmUtility.verifyEd25519Signature(signature, key, JsonUtility.getCanonicalizedJsonString(JSONDictionary));
     }
 
     /**
@@ -750,7 +748,7 @@ public class MXOlmDevice {
      * @return the base64-encoded hash value.
      */
     public String sha256(String message) {
-        return mOlmUtility.sha256(mCryptoUtil.convertToUTF8(message));
+        return mOlmUtility.sha256(StringUtilsKt.convertToUTF8(message));
     }
 
     /**

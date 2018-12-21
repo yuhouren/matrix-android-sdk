@@ -71,9 +71,6 @@ android {
             resValue "string", "git_sdk_revision_unix_date", "\"${gitRevisionUnixDate()}\""
             resValue "string", "git_sdk_revision_date", "\"${gitRevisionDate()}\""
 
-            // Set to BODY instead of NONE to enable logging
-            buildConfigField "okhttp3.logging.HttpLoggingInterceptor.Level", "OKHTTP_LOGGING_LEVEL", "okhttp3.logging.HttpLoggingInterceptor.Level.NONE"
-
             minifyEnabled false
         }
 
@@ -81,8 +78,6 @@ android {
             resValue "string", "git_sdk_revision", "\"${gitRevision()}\""
             resValue "string", "git_sdk_revision_unix_date", "\"${gitRevisionUnixDate()}\""
             resValue "string", "git_sdk_revision_date", "\"${gitRevisionDate()}\""
-
-            buildConfigField "okhttp3.logging.HttpLoggingInterceptor.Level", "OKHTTP_LOGGING_LEVEL", "okhttp3.logging.HttpLoggingInterceptor.Level.NONE"
 
             libraryVariants.all { variant ->
                 variant.outputs.each { output ->

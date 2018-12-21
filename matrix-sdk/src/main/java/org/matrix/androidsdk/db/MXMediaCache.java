@@ -40,7 +40,7 @@ import org.matrix.androidsdk.listeners.MXMediaDownloadListener;
 import org.matrix.androidsdk.network.NetworkConnectivityReceiver;
 import org.matrix.androidsdk.rest.client.MediaScanRestClient;
 import org.matrix.androidsdk.util.ContentManager;
-import org.matrix.androidsdk.util.ContentUtils;
+import org.matrix.androidsdk.util.FileContentUtils;
 import org.matrix.androidsdk.util.Log;
 import org.matrix.androidsdk.util.MXOsHandler;
 import org.matrix.androidsdk.util.callback.ApiCallback;
@@ -126,7 +126,7 @@ public class MXMediaCache {
             mediaBaseFolderFile = new File(context.getApplicationContext().getFilesDir(), previousMediaCacheFolder);
 
             if (mediaBaseFolderFile.exists()) {
-                ContentUtils.deleteDirectory(mediaBaseFolderFile);
+                FileContentUtils.deleteDirectory(mediaBaseFolderFile);
             }
         }
 
@@ -143,14 +143,14 @@ public class MXMediaCache {
         mTmpFolderFile = new File(mMediaFolderFile, MXMEDIA_STORE_TMP_FOLDER);
 
         if (mTmpFolderFile.exists()) {
-            ContentUtils.deleteDirectory(mTmpFolderFile);
+            FileContentUtils.deleteDirectory(mTmpFolderFile);
         }
         mTmpFolderFile.mkdirs();
 
         mShareFolderFile = new File(mMediaFolderFile, MXMEDIA_STORE_SHARE_FOLDER);
 
         if (mShareFolderFile.exists()) {
-            ContentUtils.deleteDirectory(mShareFolderFile);
+            FileContentUtils.deleteDirectory(mShareFolderFile);
         }
         mShareFolderFile.mkdirs();
 
@@ -227,7 +227,7 @@ public class MXMediaCache {
         AsyncTask<Void, Void, Long> task = new AsyncTask<Void, Void, Long>() {
             @Override
             protected Long doInBackground(Void... params) {
-                return ContentUtils.getDirectorySize(context,
+                return FileContentUtils.getDirectorySize(context,
                         new File(context.getApplicationContext().getFilesDir(), MXMEDIA_STORE_FOLDER),
                         1);
             }
@@ -283,7 +283,7 @@ public class MXMediaCache {
                 if (!file.isDirectory()) {
 
                     if (!filePathToKeep.contains(file.getPath())) {
-                        long ts = ContentUtils.getLastAccessTime(file);
+                        long ts = FileContentUtils.getLastAccessTime(file);
                         if (ts < aTs) {
                             length += file.length();
                             file.delete();
@@ -302,9 +302,9 @@ public class MXMediaCache {
      * Clear the media caches.
      */
     public void clear() {
-        ContentUtils.deleteDirectory(getMediaFolderFile());
+        FileContentUtils.deleteDirectory(getMediaFolderFile());
 
-        ContentUtils.deleteDirectory(mThumbnailsFolderFile);
+        FileContentUtils.deleteDirectory(mThumbnailsFolderFile);
 
         // clear the media cache
         MXMediaDownloadWorkerTask.clearBitmapsCache();
@@ -322,7 +322,7 @@ public class MXMediaCache {
      * @param applicationContext the application context
      */
     public static void clearThumbnailsCache(Context applicationContext) {
-        ContentUtils.deleteDirectory(new File(new File(applicationContext.getApplicationContext().getFilesDir(), MXMediaCache.MXMEDIA_STORE_FOLDER),
+        FileContentUtils.deleteDirectory(new File(new File(applicationContext.getApplicationContext().getFilesDir(), MXMediaCache.MXMEDIA_STORE_FOLDER),
                 MXMEDIA_STORE_MEMBER_THUMBNAILS_FOLDER));
     }
 
@@ -526,7 +526,7 @@ public class MXMediaCache {
         Log.d(LOG_TAG, "clearTmpDecryptedMediaCache()");
 
         if (mTmpFolderFile.exists()) {
-            ContentUtils.deleteDirectory(mTmpFolderFile);
+            FileContentUtils.deleteDirectory(mTmpFolderFile);
         }
 
         if (!mTmpFolderFile.exists()) {
@@ -568,7 +568,7 @@ public class MXMediaCache {
         Log.d(LOG_TAG, "clearShareDecryptedMediaCache()");
 
         if (mShareFolderFile.exists()) {
-            ContentUtils.deleteDirectory(mShareFolderFile);
+            FileContentUtils.deleteDirectory(mShareFolderFile);
         }
 
         if (!mShareFolderFile.exists()) {

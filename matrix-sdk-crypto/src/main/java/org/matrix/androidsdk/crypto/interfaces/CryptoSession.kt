@@ -23,9 +23,5 @@ interface CryptoSession {
 
     fun setDeviceId(deviceId: String)
 
-    fun getCryptoRestClient(): CryptoCryptoRestClient
-
-    fun getRoomKeysRestClient(): CryptoRoomKeysRestClient
-
     val dataHandler: CryptoDataHandler
 }

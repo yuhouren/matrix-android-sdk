@@ -34,7 +34,6 @@ import org.matrix.androidsdk.crypto.data.MXOlmSessionResult;
 import org.matrix.androidsdk.crypto.data.MXUsersDevicesMap;
 import org.matrix.androidsdk.crypto.interfaces.CryptoEvent;
 import org.matrix.androidsdk.crypto.interfaces.CryptoSession;
-import org.matrix.androidsdk.crypto.interfaces.CryptoUtil;
 import org.matrix.androidsdk.crypto.model.crypto.EncryptedEventContent;
 import org.matrix.androidsdk.crypto.model.crypto.ForwardedRoomKeyContent;
 import org.matrix.androidsdk.crypto.model.crypto.RoomKeyContent;
@@ -70,8 +69,6 @@ public class MXMegolmDecryption implements IMXDecrypting {
     private Map<String, /* senderKey|sessionId */
             Map<String /* timelineId */, List<CryptoEvent>>> mPendingEvents;
 
-    private CryptoUtil mCryptoUtil;
-
     /**
      * Init the object fields
      *
@@ -83,7 +80,6 @@ public class MXMegolmDecryption implements IMXDecrypting {
         mCrypto = crypto;
         mOlmDevice = crypto.getOlmDevice();
         mPendingEvents = new HashMap<>();
-        mCryptoUtil = crypto.getCryptoUtil();
     }
 
     @Override
@@ -412,7 +408,7 @@ public class MXMegolmDecryption implements IMXDecrypting {
                             sendToDeviceMap.setObject(encodedPayload, userId, deviceId);
 
                             Log.d(LOG_TAG, "## shareKeysWithDevice() : sending to " + userId + ":" + deviceId);
-                            mSession.getCryptoRestClient().sendToDevice(CryptoEvent.EVENT_TYPE_MESSAGE_ENCRYPTED, sendToDeviceMap, new ApiCallback<Void>() {
+                            mCrypto.getCryptoRestClient().sendToDevice(CryptoEvent.EVENT_TYPE_MESSAGE_ENCRYPTED, sendToDeviceMap, new ApiCallback<Void>() {
                                 @Override
                                 public void onSuccess(Void info) {
                                     Log.d(LOG_TAG, "## shareKeysWithDevice() : sent to " + userId + ":" + deviceId);

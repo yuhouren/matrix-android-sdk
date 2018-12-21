@@ -23,9 +23,9 @@ import com.google.gson.annotations.SerializedName;
 
 import org.jetbrains.annotations.NotNull;
 import org.matrix.androidsdk.crypto.interfaces.CryptoRoomMember;
-import org.matrix.androidsdk.interfaces.DatedObject;
 import org.matrix.androidsdk.util.ContentManager;
 import org.matrix.androidsdk.util.Log;
+import org.matrix.androidsdk.util.interfaces.DatedObject;
 
 import java.io.Externalizable;
 import java.io.IOException;

@@ -44,6 +44,7 @@ import org.matrix.androidsdk.rest.model.EncryptedMediaScanBody;
 import org.matrix.androidsdk.rest.model.EncryptedMediaScanEncryptedBody;
 import org.matrix.androidsdk.ssl.CertUtil;
 import org.matrix.androidsdk.util.ImageUtils;
+import org.matrix.androidsdk.util.JsonUtility;
 import org.matrix.androidsdk.util.JsonUtils;
 import org.matrix.androidsdk.util.Log;
 import org.matrix.androidsdk.util.callback.ApiCallback;
@@ -768,7 +769,7 @@ class MXMediaDownloadWorkerTask extends AsyncTask<Void, Void, JsonElement> {
                     EncryptedMediaScanBody encryptedMediaScanBody = new EncryptedMediaScanBody();
                     encryptedMediaScanBody.encryptedFileInfo = mEncryptedFileInfo;
 
-                    String data = JsonUtils.getCanonicalizedJsonString(encryptedMediaScanBody);
+                    String data = JsonUtility.getCanonicalizedJsonString(encryptedMediaScanBody);
 
                     // Encrypt the data, if antivirus server supports it
                     String publicServerKey = getAntivirusServerPublicKey();
@@ -786,7 +787,7 @@ class MXMediaDownloadWorkerTask extends AsyncTask<Void, Void, JsonElement> {
                         EncryptedMediaScanEncryptedBody encryptedMediaScanEncryptedBody = new EncryptedMediaScanEncryptedBody();
                         encryptedMediaScanEncryptedBody.encryptedBodyFileInfo = new EncryptedBodyFileInfo(message);
 
-                        data = JsonUtils.getCanonicalizedJsonString(encryptedMediaScanEncryptedBody);
+                        data = JsonUtility.getCanonicalizedJsonString(encryptedMediaScanEncryptedBody);
                     }
                     // Else: no public key on this server, do not encrypt data
 

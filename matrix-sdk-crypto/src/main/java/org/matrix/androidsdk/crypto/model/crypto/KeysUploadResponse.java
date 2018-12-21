@@ -17,6 +17,8 @@ package org.matrix.androidsdk.crypto.model.crypto;
 
 import android.text.TextUtils;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.Map;
 
 /**
@@ -27,6 +29,7 @@ public class KeysUploadResponse {
     /**
      * The count per algorithm as returned by the home server: a map (algorithm to count).
      */
+    @SerializedName("one_time_key_counts")
     public Map<String, Integer> oneTimeKeyCounts;
 
     /**
