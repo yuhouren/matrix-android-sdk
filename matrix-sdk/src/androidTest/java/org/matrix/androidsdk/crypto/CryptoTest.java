@@ -286,7 +286,7 @@ public class CryptoTest {
         Assert.assertTrue(results.containsKey("setDevicesKnown"));
 
         // Read again from the store
-        aliceDeviceFromBobPOV = bobSession.getCrypto().mCryptoStore.getUserDevice(aliceDeviceFromBobPOV.deviceId, aliceDeviceFromBobPOV.userId);
+        aliceDeviceFromBobPOV = bobSession.getCrypto().getCryptoStore().getUserDevice(aliceDeviceFromBobPOV.deviceId, aliceDeviceFromBobPOV.userId);
 
         Assert.assertTrue(aliceDeviceFromBobPOV.isUnverified());
 
@@ -307,7 +307,7 @@ public class CryptoTest {
         Assert.assertTrue(results.containsKey("setDeviceVerification1"));
 
         // Read again from the store
-        aliceDeviceFromBobPOV = bobSession.getCrypto().mCryptoStore.getUserDevice(aliceDeviceFromBobPOV.deviceId, aliceDeviceFromBobPOV.userId);
+        aliceDeviceFromBobPOV = bobSession.getCrypto().getCryptoStore().getUserDevice(aliceDeviceFromBobPOV.deviceId, aliceDeviceFromBobPOV.userId);
 
         Assert.assertTrue(aliceDeviceFromBobPOV.isBlocked());
 
@@ -2883,7 +2883,7 @@ public class CryptoTest {
         roomFromBobPOV.addEventListener(eventListenerBob2);
         roomFromSamPOV.addEventListener(eventListenerSam2);
 
-        Assert.assertFalse(aliceSession.getCrypto().mCryptoStore.getGlobalBlacklistUnverifiedDevices());
+        Assert.assertFalse(aliceSession.getCrypto().getCryptoStore().getGlobalBlacklistUnverifiedDevices());
 
         CountDownLatch lock4 = new CountDownLatch(1);
         aliceSession.getCrypto().setGlobalBlacklistUnverifiedDevices(true, new TestApiCallback<Void>(lock4) {
@@ -2896,7 +2896,7 @@ public class CryptoTest {
         mTestHelper.await(lock4);
         Assert.assertTrue(results.containsKey("setGlobalBlacklistUnverifiedDevices True"));
 
-        Assert.assertTrue(aliceSession.getCrypto().mCryptoStore.getGlobalBlacklistUnverifiedDevices());
+        Assert.assertTrue(aliceSession.getCrypto().getCryptoStore().getGlobalBlacklistUnverifiedDevices());
 
         // ensure that there is no received message
         results.clear();
@@ -2926,7 +2926,7 @@ public class CryptoTest {
         mTestHelper.await(lock6);
         Assert.assertTrue(results.containsKey("setGlobalBlacklistUnverifiedDevices false"));
 
-        Assert.assertFalse(aliceSession.getCrypto().mCryptoStore.getGlobalBlacklistUnverifiedDevices());
+        Assert.assertFalse(aliceSession.getCrypto().getCryptoStore().getGlobalBlacklistUnverifiedDevices());
 
         // ensure that the messages are received
         results.clear();
@@ -2989,15 +2989,15 @@ public class CryptoTest {
         Assert.assertTrue(results.containsKey("eventListenerEncyptedSam2"));
 
         CountDownLatch lock11 = new CountDownLatch(1);
-        aliceSession.getCrypto().setRoomUnblacklistUnverifiedDevices(roomFromAlicePOV.getRoomId(), new TestApiCallback<Void>(lock11) {
+        aliceSession.getCrypto().setRoomUnBlacklistUnverifiedDevices(roomFromAlicePOV.getRoomId(), new TestApiCallback<Void>(lock11) {
             @Override
             public void onSuccess(Void info) {
-                results.put("setRoomUnblacklistUnverifiedDevices", "setRoomUnblacklistUnverifiedDevices");
+                results.put("setRoomUnBlacklistUnverifiedDevices", "setRoomUnBlacklistUnverifiedDevices");
                 super.onSuccess(info);
             }
         });
         mTestHelper.await(lock11);
-        Assert.assertTrue(results.containsKey("setRoomUnblacklistUnverifiedDevices"));
+        Assert.assertTrue(results.containsKey("setRoomUnBlacklistUnverifiedDevices"));
 
         // ensure that the messages are received
         results.clear();

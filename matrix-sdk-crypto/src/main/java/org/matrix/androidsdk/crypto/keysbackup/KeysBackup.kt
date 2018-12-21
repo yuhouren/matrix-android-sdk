@@ -19,11 +19,11 @@ package org.matrix.androidsdk.crypto.keysbackup
 import android.support.annotation.VisibleForTesting
 import org.matrix.androidsdk.crypto.MXCRYPTO_ALGORITHM_MEGOLM
 import org.matrix.androidsdk.crypto.MXCRYPTO_ALGORITHM_MEGOLM_BACKUP
-import org.matrix.androidsdk.crypto.MXCrypto
 import org.matrix.androidsdk.crypto.MegolmSessionData
 import org.matrix.androidsdk.crypto.data.ImportRoomKeysResult
 import org.matrix.androidsdk.crypto.data.MXDeviceInfo
 import org.matrix.androidsdk.crypto.data.MXOlmInboundGroupSession2
+import org.matrix.androidsdk.crypto.internal.MXCryptoImpl
 import org.matrix.androidsdk.crypto.model.keys.*
 import org.matrix.androidsdk.crypto.rest.RoomKeysRestClient
 import org.matrix.androidsdk.crypto.util.computeRecoveryKey
@@ -46,7 +46,7 @@ import java.util.*
  * A KeysBackup class instance manage incremental backup of e2e keys (megolm keys)
  * to the user's homeserver.
  */
-class KeysBackup(private val mCrypto: MXCrypto,
+class KeysBackup(private val mCrypto: MXCryptoImpl,
                  homeServerUrl: String,
                  accessToken: String,
                  converterFactory: Converter.Factory) {
@@ -263,7 +263,7 @@ class KeysBackup(private val mCrypto: MXCrypto,
                 }
 
                 var isSignatureValid = false
-                mCrypto.olmDevice?.let {
+                mCrypto.getOlmDevice()?.let {
                     try {
                         it.verifySignature(device.fingerprint(), authData.signalableJSONDictionary(), mySigs[keyId] as String)
                         isSignatureValid = true

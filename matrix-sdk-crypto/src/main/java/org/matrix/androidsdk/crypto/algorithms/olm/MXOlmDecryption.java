@@ -23,7 +23,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
 import org.matrix.androidsdk.crypto.IncomingRoomKeyRequest;
-import org.matrix.androidsdk.crypto.MXCrypto;
 import org.matrix.androidsdk.crypto.MXCryptoError;
 import org.matrix.androidsdk.crypto.MXDecryptionException;
 import org.matrix.androidsdk.crypto.MXEventDecryptionResult;
@@ -31,6 +30,7 @@ import org.matrix.androidsdk.crypto.MXOlmDevice;
 import org.matrix.androidsdk.crypto.algorithms.IMXDecrypting;
 import org.matrix.androidsdk.crypto.interfaces.CryptoEvent;
 import org.matrix.androidsdk.crypto.interfaces.CryptoSession;
+import org.matrix.androidsdk.crypto.internal.MXCryptoImpl;
 import org.matrix.androidsdk.crypto.model.crypto.OlmEventContent;
 import org.matrix.androidsdk.crypto.model.crypto.OlmPayloadContent;
 import org.matrix.androidsdk.util.JsonUtility;
@@ -55,7 +55,7 @@ public class MXOlmDecryption implements IMXDecrypting {
     private CryptoSession mSession;
 
     @Override
-    public void initWithMatrixSession(CryptoSession matrixSession, MXCrypto crypto) {
+    public void initWithMatrixSession(CryptoSession matrixSession, MXCryptoImpl crypto) {
         mSession = matrixSession;
         mOlmDevice = crypto.getOlmDevice();
     }

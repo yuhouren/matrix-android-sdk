@@ -22,6 +22,7 @@ import android.os.Handler;
 import org.matrix.androidsdk.crypto.cryptostore.IMXCryptoStore;
 import org.matrix.androidsdk.crypto.data.MXUsersDevicesMap;
 import org.matrix.androidsdk.crypto.interfaces.CryptoEvent;
+import org.matrix.androidsdk.crypto.internal.MXCryptoImpl;
 import org.matrix.androidsdk.crypto.model.crypto.RoomKeyRequest;
 import org.matrix.androidsdk.util.Log;
 import org.matrix.androidsdk.util.callback.ApiCallback;
@@ -39,7 +40,7 @@ public class MXOutgoingRoomKeyRequestManager {
     private static final int SEND_KEY_REQUESTS_DELAY_MS = 500;
 
     // the linked crypto
-    private final MXCrypto mCrypto;
+    private final MXCryptoImpl mCrypto;
 
     // working handler (should not be the UI thread)
     private Handler mWorkingHandler;
@@ -62,7 +63,7 @@ public class MXOutgoingRoomKeyRequestManager {
      *
      * @param crypto the crypto engine
      */
-    public MXOutgoingRoomKeyRequestManager(MXCrypto crypto) {
+    public MXOutgoingRoomKeyRequestManager(MXCryptoImpl crypto) {
         mCrypto = crypto;
         mWorkingHandler = crypto.getEncryptingThreadHandler();
         mCryptoStore = crypto.getCryptoStore();

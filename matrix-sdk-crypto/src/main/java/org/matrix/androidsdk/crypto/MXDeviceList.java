@@ -23,6 +23,7 @@ import org.matrix.androidsdk.crypto.cryptostore.IMXCryptoStore;
 import org.matrix.androidsdk.crypto.data.MXDeviceInfo;
 import org.matrix.androidsdk.crypto.data.MXUsersDevicesMap;
 import org.matrix.androidsdk.crypto.interfaces.CryptoSession;
+import org.matrix.androidsdk.crypto.internal.MXCryptoImpl;
 import org.matrix.androidsdk.crypto.model.crypto.KeysQueryResponse;
 import org.matrix.androidsdk.util.Log;
 import org.matrix.androidsdk.util.MXPatterns;
@@ -105,7 +106,7 @@ public class MXDeviceList {
     // pending queues list
     private final List<DownloadKeysPromise> mDownloadKeysQueues = new ArrayList<>();
 
-    private final MXCrypto mxCrypto;
+    private final MXCryptoImpl mxCrypto;
 
     private final CryptoSession mxSession;
 
@@ -120,7 +121,7 @@ public class MXDeviceList {
      * @param session the session
      * @param crypto  the crypto session
      */
-    public MXDeviceList(CryptoSession session, MXCrypto crypto) {
+    public MXDeviceList(CryptoSession session, MXCryptoImpl crypto) {
         mxSession = session;
         mxCrypto = crypto;
         mCryptoStore = crypto.getCryptoStore();

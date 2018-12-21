@@ -19,8 +19,8 @@ package org.matrix.androidsdk.crypto.algorithms;
 
 import com.google.gson.JsonElement;
 
-import org.matrix.androidsdk.crypto.MXCrypto;
 import org.matrix.androidsdk.crypto.interfaces.CryptoSession;
+import org.matrix.androidsdk.crypto.internal.MXCryptoImpl;
 import org.matrix.androidsdk.util.callback.ApiCallback;
 
 import java.util.List;
@@ -36,7 +36,7 @@ public interface IMXEncrypting {
      * @param matrixSession the related 'MXSession'.
      * @param roomId        the id of the room we will be sending to.
      */
-    void initWithMatrixSession(CryptoSession matrixSession, MXCrypto crypto, String roomId);
+    void initWithMatrixSession(CryptoSession matrixSession, MXCryptoImpl crypto, String roomId);
 
     /**
      * Encrypt an event content according to the configuration of the room.

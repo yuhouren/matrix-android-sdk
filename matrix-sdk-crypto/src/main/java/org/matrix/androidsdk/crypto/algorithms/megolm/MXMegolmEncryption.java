@@ -23,7 +23,6 @@ import android.text.TextUtils;
 import com.google.gson.JsonElement;
 
 import org.matrix.androidsdk.crypto.CryptoConstantsKt;
-import org.matrix.androidsdk.crypto.MXCrypto;
 import org.matrix.androidsdk.crypto.MXCryptoError;
 import org.matrix.androidsdk.crypto.MXOlmDevice;
 import org.matrix.androidsdk.crypto.algorithms.IMXEncrypting;
@@ -33,6 +32,7 @@ import org.matrix.androidsdk.crypto.data.MXQueuedEncryption;
 import org.matrix.androidsdk.crypto.data.MXUsersDevicesMap;
 import org.matrix.androidsdk.crypto.interfaces.CryptoEvent;
 import org.matrix.androidsdk.crypto.interfaces.CryptoSession;
+import org.matrix.androidsdk.crypto.internal.MXCryptoImpl;
 import org.matrix.androidsdk.util.JsonUtility;
 import org.matrix.androidsdk.util.Log;
 import org.matrix.androidsdk.util.StringUtilsKt;
@@ -49,7 +49,7 @@ import java.util.Map;
 public class MXMegolmEncryption implements IMXEncrypting {
     private static final String LOG_TAG = MXMegolmEncryption.class.getSimpleName();
 
-    private MXCrypto mCrypto;
+    private MXCryptoImpl mCrypto;
 
     // The id of the room we will be sending to.
     private String mRoomId;
@@ -71,7 +71,7 @@ public class MXMegolmEncryption implements IMXEncrypting {
     private int mSessionRotationPeriodMs;
 
     @Override
-    public void initWithMatrixSession(CryptoSession matrixSession, MXCrypto crypto, String roomId) {
+    public void initWithMatrixSession(CryptoSession matrixSession, MXCryptoImpl crypto, String roomId) {
         mCrypto = crypto;
 
         mRoomId = roomId;

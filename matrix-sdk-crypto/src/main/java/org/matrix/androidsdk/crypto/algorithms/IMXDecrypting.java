@@ -20,11 +20,11 @@ package org.matrix.androidsdk.crypto.algorithms;
 import android.support.annotation.Nullable;
 
 import org.matrix.androidsdk.crypto.IncomingRoomKeyRequest;
-import org.matrix.androidsdk.crypto.MXCrypto;
 import org.matrix.androidsdk.crypto.MXDecryptionException;
 import org.matrix.androidsdk.crypto.MXEventDecryptionResult;
 import org.matrix.androidsdk.crypto.interfaces.CryptoEvent;
 import org.matrix.androidsdk.crypto.interfaces.CryptoSession;
+import org.matrix.androidsdk.crypto.internal.MXCryptoImpl;
 
 /**
  * An interface for decrypting data
@@ -35,7 +35,7 @@ public interface IMXDecrypting {
      *
      * @param matrixSession the session
      */
-    void initWithMatrixSession(CryptoSession matrixSession, MXCrypto crypto);
+    void initWithMatrixSession(CryptoSession matrixSession, MXCryptoImpl crypto);
 
     /**
      * Decrypt an event

@@ -302,7 +302,7 @@ class CryptoStoreMigrationTest {
         assertTrue(aliceSession2.crypto?.cryptoStore is RealmCryptoStore)
 
         // Not empty list
-        assertTrue(aliceSession2.crypto!!.cryptoStore!!.inboundGroupSessions!!.isNotEmpty())
+        assertTrue(aliceSession2.crypto!!.cryptoStore.inboundGroupSessions!!.isNotEmpty())
 
         // Bob should still be able to decrypt message from Alice
 

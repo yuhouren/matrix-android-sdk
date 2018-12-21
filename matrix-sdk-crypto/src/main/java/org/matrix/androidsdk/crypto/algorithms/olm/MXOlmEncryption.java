@@ -22,12 +22,12 @@ import android.text.TextUtils;
 
 import com.google.gson.JsonElement;
 
-import org.matrix.androidsdk.crypto.MXCrypto;
 import org.matrix.androidsdk.crypto.algorithms.IMXEncrypting;
 import org.matrix.androidsdk.crypto.data.MXDeviceInfo;
 import org.matrix.androidsdk.crypto.data.MXOlmSessionResult;
 import org.matrix.androidsdk.crypto.data.MXUsersDevicesMap;
 import org.matrix.androidsdk.crypto.interfaces.CryptoSession;
+import org.matrix.androidsdk.crypto.internal.MXCryptoImpl;
 import org.matrix.androidsdk.util.JsonUtility;
 import org.matrix.androidsdk.util.callback.ApiCallback;
 import org.matrix.androidsdk.util.callback.SimpleApiCallback;
@@ -39,11 +39,11 @@ import java.util.Map;
 
 public class MXOlmEncryption implements IMXEncrypting {
     private CryptoSession mSession;
-    private MXCrypto mCrypto;
+    private MXCryptoImpl mCrypto;
     private String mRoomId;
 
     @Override
-    public void initWithMatrixSession(CryptoSession matrixSession, MXCrypto crypto, String roomId) {
+    public void initWithMatrixSession(CryptoSession matrixSession, MXCryptoImpl crypto, String roomId) {
         mSession = matrixSession;
         mCrypto = crypto;
         mRoomId = roomId;

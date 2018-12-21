@@ -37,6 +37,7 @@ import org.matrix.androidsdk.crypto.cryptostore.IMXCryptoStore;
 import org.matrix.androidsdk.crypto.cryptostore.MXFileCryptoStore;
 import org.matrix.androidsdk.crypto.cryptostore.db.RealmCryptoStore;
 import org.matrix.androidsdk.crypto.interfaces.CryptoSession;
+import org.matrix.androidsdk.crypto.internal.MXCryptoImpl;
 import org.matrix.androidsdk.crypto.model.rest.DeleteDeviceAuth;
 import org.matrix.androidsdk.crypto.model.rest.DeleteDeviceParams;
 import org.matrix.androidsdk.crypto.model.rest.DevicesListResponse;
@@ -2379,7 +2380,7 @@ public class MXSession implements CryptoSession {
                 return;
             }
 
-            mCrypto = new MXCrypto(this,
+            mCrypto = new MXCryptoImpl(this,
                     mCryptoStore,
                     sCryptoConfig,
                     mHsConfig.getHomeserverUri().toString(),
@@ -2407,7 +2408,7 @@ public class MXSession implements CryptoSession {
             if (cryptoEnabled) {
                 Log.d(LOG_TAG, "Crypto is enabled");
                 mCryptoStore.open();
-                mCrypto = new MXCrypto(this,
+                mCrypto = new MXCryptoImpl(this,
                         mCryptoStore,
                         sCryptoConfig,
                         mHsConfig.getHomeserverUri().toString(),

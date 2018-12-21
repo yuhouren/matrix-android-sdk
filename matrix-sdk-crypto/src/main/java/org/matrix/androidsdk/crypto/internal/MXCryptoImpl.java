@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.matrix.androidsdk.crypto;
+package org.matrix.androidsdk.crypto.internal;
 
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -29,6 +29,21 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
+import org.jetbrains.annotations.NotNull;
+import org.matrix.androidsdk.crypto.CryptoConstantsKt;
+import org.matrix.androidsdk.crypto.IncomingRoomKeyRequest;
+import org.matrix.androidsdk.crypto.IncomingRoomKeyRequestCancellation;
+import org.matrix.androidsdk.crypto.MXCrypto;
+import org.matrix.androidsdk.crypto.MXCryptoAlgorithms;
+import org.matrix.androidsdk.crypto.MXCryptoConfig;
+import org.matrix.androidsdk.crypto.MXCryptoError;
+import org.matrix.androidsdk.crypto.MXDecryptionException;
+import org.matrix.androidsdk.crypto.MXDeviceList;
+import org.matrix.androidsdk.crypto.MXEventDecryptionResult;
+import org.matrix.androidsdk.crypto.MXMegolmExportEncryption;
+import org.matrix.androidsdk.crypto.MXOlmDevice;
+import org.matrix.androidsdk.crypto.MXOutgoingRoomKeyRequestManager;
+import org.matrix.androidsdk.crypto.MegolmSessionData;
 import org.matrix.androidsdk.crypto.algorithms.IMXDecrypting;
 import org.matrix.androidsdk.crypto.algorithms.IMXEncrypting;
 import org.matrix.androidsdk.crypto.cryptostore.IMXCryptoStore;
@@ -84,8 +99,8 @@ import retrofit2.Converter;
  * MXCrypto maintains all necessary keys and their sharing with other devices required for the crypto.
  * Specially, it tracks all room membership changes events in order to do keys updates.
  */
-public class MXCrypto {
-    private static final String LOG_TAG = MXCrypto.class.getSimpleName();
+public class MXCryptoImpl implements MXCrypto {
+    private static final String LOG_TAG = MXCryptoImpl.class.getSimpleName();
 
     // max number of keys to upload at once
     // Creating keys can be an expensive operation so we limit the
@@ -161,7 +176,7 @@ public class MXCrypto {
 
         @Override
         public void onToDeviceEvent(CryptoEvent event) {
-            MXCrypto.this.onToDeviceEvent(event);
+            MXCryptoImpl.this.onToDeviceEvent(event);
         }
 
         @Override
@@ -204,12 +219,12 @@ public class MXCrypto {
      * @param cryptoStore   the crypto store
      * @param cryptoConfig  the optional set of parameters used to configure the e2e encryption.
      */
-    public MXCrypto(@NonNull CryptoSession matrixSession,
-                    @NonNull IMXCryptoStore cryptoStore,
-                    @Nullable MXCryptoConfig cryptoConfig,
-                    String homeServerUrl,
-                    String accessToken,
-                    Converter.Factory converterFactory) {
+    public MXCryptoImpl(@NonNull CryptoSession matrixSession,
+                        @NonNull IMXCryptoStore cryptoStore,
+                        @Nullable MXCryptoConfig cryptoConfig,
+                        String homeServerUrl,
+                        String accessToken,
+                        Converter.Factory converterFactory) {
         mSession = matrixSession;
         mCryptoStore = cryptoStore;
 
@@ -343,6 +358,7 @@ public class MXCrypto {
         return mUIHandler;
     }
 
+    @Override
     public void setNetworkConnectivityReceiver(CryptoNetworkConnectivityReceiver networkConnectivityReceiver) {
         mNetworkConnectivityReceiver = networkConnectivityReceiver;
     }
@@ -364,6 +380,7 @@ public class MXCrypto {
     /**
      * @return my device info
      */
+    @Override
     public MXDeviceInfo getMyDevice() {
         return mMyDevice;
     }
@@ -371,6 +388,7 @@ public class MXCrypto {
     /**
      * @return the crypto store
      */
+    @Override
     public IMXCryptoStore getCryptoStore() {
         return mCryptoStore;
     }
@@ -378,6 +396,7 @@ public class MXCrypto {
     /**
      * @return the deviceList
      */
+    @Override
     public MXDeviceList getDeviceList() {
         return mDevicesList;
     }
@@ -388,6 +407,7 @@ public class MXCrypto {
      * @param userId the user id
      * @return the tracking status
      */
+    @Override
     public int getDeviceTrackingStatus(String userId) {
         return mCryptoStore.getDeviceTrackingStatus(userId, MXDeviceList.TRACKING_STATUS_NOT_TRACKED);
     }
@@ -397,6 +417,7 @@ public class MXCrypto {
      *
      * @return true if the crypto is started
      */
+    @Override
     public boolean isStarted() {
         return mIsStarted;
     }
@@ -406,6 +427,7 @@ public class MXCrypto {
      *
      * @return true if the crypto is starting
      */
+    @Override
     public boolean isStarting() {
         return mIsStarting;
     }
@@ -419,6 +441,7 @@ public class MXCrypto {
      * @param isInitialSync true if it starts from an initial sync
      * @param aCallback     the asynchronous callback
      */
+    @Override
     public void start(final boolean isInitialSync, final ApiCallback<Void> aCallback) {
         synchronized (mInitializationCallbacks) {
             if ((null != aCallback) && (mInitializationCallbacks.indexOf(aCallback) < 0)) {
@@ -574,6 +597,7 @@ public class MXCrypto {
     /**
      * Close the crypto
      */
+    @Override
     public void close() {
         if (null != mEncryptingHandlerThread) {
             mSession.getDataHandler().setCryptoEventsListener(null);
@@ -617,6 +641,7 @@ public class MXCrypto {
      * @return the olmdevice instance, or null if the Crypto is closed.
      */
     @Nullable
+    @Override
     public MXOlmDevice getOlmDevice() {
         return mOlmDevice;
     }
@@ -624,6 +649,7 @@ public class MXCrypto {
     /**
      * @return the KeysBackup instance
      */
+    @Override
     public KeysBackup getKeysBackup() {
         return mKeysBackup;
     }
@@ -635,6 +661,7 @@ public class MXCrypto {
      * @param fromToken    the start sync token
      * @param isCatchingUp true if there is a catch-up in progress.
      */
+    @Override
     public void onSyncCompleted(final CryptoSyncResponse syncResponse, final String fromToken, final boolean isCatchingUp) {
         getEncryptingThreadHandler().post(new Runnable() {
             @Override
@@ -704,6 +731,7 @@ public class MXCrypto {
      * @param algorithm the encryption algorithm.
      * @return the device info, or null if not found / unsupported algorithm / crypto released
      */
+    @Override
     @Nullable
     public MXDeviceInfo deviceWithIdentityKey(final String senderKey, final String algorithm) {
         if (!hasBeenReleased()) {
@@ -758,8 +786,8 @@ public class MXCrypto {
      * @param devices  the devices. Note that the mVerified member of the devices in this list will not be updated by this method.
      * @param callback the asynchronous callback
      */
-    public void setDevicesKnown(@NonNull final List<MXDeviceInfo> devices,
-                                @Nullable final ApiCallback<Void> callback) {
+    @Override
+    public void setDevicesKnown(@NotNull List<? extends MXDeviceInfo> devices, @Nullable ApiCallback<Void> callback) {
         if (hasBeenReleased()) {
             return;
         }
@@ -826,6 +854,7 @@ public class MXCrypto {
      * @param userId             the owner of the device
      * @param callback           the asynchronous callback
      */
+    @Override
     public void setDeviceVerification(final int verificationStatus, final String deviceId, final String userId, final ApiCallback<Void> callback) {
         if (hasBeenReleased()) {
             return;
@@ -976,6 +1005,7 @@ public class MXCrypto {
     /**
      * @return the stored device keys for a user.
      */
+    @Override
     public List<MXDeviceInfo> getUserDevices(final String userId) {
         Map<String, MXDeviceInfo> map = getCryptoStore().getUserDevices(userId);
         return (null != map) ? new ArrayList<>(map.values()) : new ArrayList<MXDeviceInfo>();
@@ -989,6 +1019,7 @@ public class MXCrypto {
      * @param users    a list of user ids.
      * @param callback the asynchronous callback
      */
+    @Override
     public void ensureOlmSessionsForUsers(List<String> users, final ApiCallback<MXUsersDevicesMap<MXOlmSessionResult>> callback) {
         Log.d(LOG_TAG, "## ensureOlmSessionsForUsers() : ensureOlmSessionsForUsers " + users);
 
@@ -1223,6 +1254,7 @@ public class MXCrypto {
      * @param room         the room the event will be sent.
      * @param callback     the asynchronous callback
      */
+    @Override
     public void encryptEventContent(final JsonElement eventContent,
                                     final String eventType,
                                     final CryptoRoom room,
@@ -1379,6 +1411,7 @@ public class MXCrypto {
      * @param timeline the id of the timeline where the event is decrypted. It is used to prevent replay attack.
      * @return the MXEventDecryptionResult data, or null in case of error
      */
+    @Override
     @Nullable
     public MXEventDecryptionResult decryptEvent(final CryptoEvent event, final String timeline) throws MXDecryptionException {
         if (null == event) {
@@ -1445,6 +1478,7 @@ public class MXCrypto {
      *
      * @param timelineId the timeline id
      */
+    @Override
     public void resetReplayAttackCheckInTimeline(final String timelineId) {
         if ((null != timelineId) && (null != getOlmDevice())) {
             getDecryptingThreadHandler().post(new Runnable() {
@@ -2270,6 +2304,7 @@ public class MXCrypto {
      * @param password the password
      * @param callback the exported keys
      */
+    @Override
     public void exportRoomKeys(final String password, final ApiCallback<byte[]> callback) {
         exportRoomKeys(password, MXMegolmExportEncryption.DEFAULT_ITERATION_COUNT, callback);
     }
@@ -2336,6 +2371,7 @@ public class MXCrypto {
      * @param password        the password
      * @param callback        the asynchronous callback.
      */
+    @Override
     public void importRoomKeys(final byte[] roomKeysAsArray,
                                final String password,
                                final ApiCallback<ImportRoomKeysResult> callback) {
@@ -2459,6 +2495,7 @@ public class MXCrypto {
      *
      * @return true to warn when some unknown devices are detected.
      */
+    @Override
     public boolean warnOnUnknownDevices() {
         return mWarnOnUnknownDevices;
     }
@@ -2468,6 +2505,7 @@ public class MXCrypto {
      *
      * @param warn true to warn when some unknown devices are detected.
      */
+    @Override
     public void setWarnOnUnknownDevices(boolean warn) {
         mWarnOnUnknownDevices = warn;
     }
@@ -2504,12 +2542,13 @@ public class MXCrypto {
      * @param userIds  the user ids list
      * @param callback the asynchronous callback.
      */
+    @Override
     public void checkUnknownDevices(List<String> userIds, final ApiCallback<Void> callback) {
         // force the refresh to ensure that the devices list is up-to-date
         mDevicesList.downloadKeys(userIds, true, new SimpleApiCallback<MXUsersDevicesMap<MXDeviceInfo>>(callback) {
             @Override
             public void onSuccess(MXUsersDevicesMap<MXDeviceInfo> devicesMap) {
-                MXUsersDevicesMap<MXDeviceInfo> unknownDevices = MXCrypto.getUnknownDevices(devicesMap);
+                MXUsersDevicesMap<MXDeviceInfo> unknownDevices = MXCryptoImpl.getUnknownDevices(devicesMap);
 
                 if (unknownDevices.getMap().size() == 0) {
                     callback.onSuccess(null);
@@ -2531,6 +2570,7 @@ public class MXCrypto {
      * @param block    true to unilaterally blacklist all
      * @param callback the asynchronous callback.
      */
+    @Override
     public void setGlobalBlacklistUnverifiedDevices(final boolean block, final ApiCallback<Void> callback) {
         getEncryptingThreadHandler().post(new Runnable() {
             @Override
@@ -2566,6 +2606,7 @@ public class MXCrypto {
      *
      * @param callback the asynchronous callback
      */
+    @Override
     public void getGlobalBlacklistUnverifiedDevices(final ApiCallback<Boolean> callback) {
         getEncryptingThreadHandler().post(new Runnable() {
             @Override
@@ -2610,6 +2651,7 @@ public class MXCrypto {
      * @param roomId   the room id
      * @param callback the asynchronous callback
      */
+    @Override
     public void isRoomBlacklistUnverifiedDevices(final String roomId, final ApiCallback<Boolean> callback) {
         getEncryptingThreadHandler().post(new Runnable() {
             @Override
@@ -2684,6 +2726,7 @@ public class MXCrypto {
      * @param roomId   the room id
      * @param callback the asynchronous callback
      */
+    @Override
     public void setRoomBlacklistUnverifiedDevices(final String roomId, final ApiCallback<Void> callback) {
         setRoomBlacklistUnverifiedDevices(roomId, true, callback);
     }
@@ -2694,7 +2737,8 @@ public class MXCrypto {
      * @param roomId   the room id
      * @param callback the asynchronous callback
      */
-    public void setRoomUnblacklistUnverifiedDevices(final String roomId, final ApiCallback<Void> callback) {
+    @Override
+    public void setRoomUnBlacklistUnverifiedDevices(final String roomId, final ApiCallback<Void> callback) {
         setRoomBlacklistUnverifiedDevices(roomId, false, callback);
     }
 
@@ -2755,6 +2799,7 @@ public class MXCrypto {
         }
     }
 
+    @Override
     public CryptoRestClient getCryptoRestClient() {
         return mCryptoRestClient;
     }

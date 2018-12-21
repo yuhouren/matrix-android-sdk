@@ -21,7 +21,6 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import org.matrix.androidsdk.crypto.IncomingRoomKeyRequest;
-import org.matrix.androidsdk.crypto.MXCrypto;
 import org.matrix.androidsdk.crypto.MXCryptoError;
 import org.matrix.androidsdk.crypto.MXDecryptionException;
 import org.matrix.androidsdk.crypto.MXEventDecryptionResult;
@@ -34,6 +33,7 @@ import org.matrix.androidsdk.crypto.data.MXOlmSessionResult;
 import org.matrix.androidsdk.crypto.data.MXUsersDevicesMap;
 import org.matrix.androidsdk.crypto.interfaces.CryptoEvent;
 import org.matrix.androidsdk.crypto.interfaces.CryptoSession;
+import org.matrix.androidsdk.crypto.internal.MXCryptoImpl;
 import org.matrix.androidsdk.crypto.model.crypto.EncryptedEventContent;
 import org.matrix.androidsdk.crypto.model.crypto.ForwardedRoomKeyContent;
 import org.matrix.androidsdk.crypto.model.crypto.RoomKeyContent;
@@ -60,7 +60,7 @@ public class MXMegolmDecryption implements IMXDecrypting {
     // the matrix session
     private CryptoSession mSession;
 
-    private MXCrypto mCrypto;
+    private MXCryptoImpl mCrypto;
 
     /**
      * Events which we couldn't decrypt due to unknown sessions / indexes: map from
@@ -75,7 +75,7 @@ public class MXMegolmDecryption implements IMXDecrypting {
      * @param matrixSession the matrix session
      */
     @Override
-    public void initWithMatrixSession(CryptoSession matrixSession, MXCrypto crypto) {
+    public void initWithMatrixSession(CryptoSession matrixSession, MXCryptoImpl crypto) {
         mSession = matrixSession;
         mCrypto = crypto;
         mOlmDevice = crypto.getOlmDevice();
