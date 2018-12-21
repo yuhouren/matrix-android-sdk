@@ -93,7 +93,7 @@ interface MXCrypto {
 
     fun setRoomBlacklistUnverifiedDevices(roomId: String, apiCallback: ApiCallback<Void>)
 
-    fun getDeviceInfo(userId: String, deviceId: String?, callback: ApiCallback<MXDeviceInfo>)
+    fun getDeviceInfo(userId: String, deviceId: String, callback: ApiCallback<MXDeviceInfo>)
 
     fun reRequestRoomKeyForEvent(event: CryptoEvent)
 

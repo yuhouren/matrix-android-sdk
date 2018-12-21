@@ -141,14 +141,14 @@ public class MXCryptoImpl implements MXCrypto {
     private boolean mIsStarted;
 
     // the crypto background threads
-    private HandlerThread mEncryptingHandlerThread = null;
+    private HandlerThread mEncryptingHandlerThread;
     private Handler mEncryptingHandler = null;
 
-    private HandlerThread mDecryptingHandlerThread = null;
+    private HandlerThread mDecryptingHandlerThread;
     private Handler mDecryptingHandler = null;
 
     // the UI thread
-    private Handler mUIHandler = null;
+    private Handler mUIHandler;
 
     private CryptoNetworkConnectivityReceiver mNetworkConnectivityReceiver;
 
@@ -191,7 +191,7 @@ public class MXCryptoImpl implements MXCrypto {
     };
 
     // initialization callbacks
-    private final List<ApiCallback<Void>> mInitializationCallbacks = new ArrayList();
+    private final List<ApiCallback<Void>> mInitializationCallbacks = new ArrayList<>();
 
     // Warn the user if some new devices are detected while encrypting a message.
     private boolean mWarnOnUnknownDevices = true;
